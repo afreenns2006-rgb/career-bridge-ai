@@ -1,0 +1,200 @@
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+                       Version 3, 19 November 2007
+
+ Copyright (C) 2024-2026 Career Bridge AI Contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+---
+
+PREAMBLE
+
+The GNU Affero General Public License is a free, copyleft license for
+software and other kinds of works, specifically designed to ensure
+cooperation with the community in the case of network server software.
+
+The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works. By contrast,
+our General Public Licenses are intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.
+
+---
+
+ADDITIONAL TERMS
+
+1. NETWORK SERVICES
+   If you modify this program, and a user can interact with its modified
+   version over a network, your modified version must provide a mechanism
+   for obtaining the source code. This includes both object code and
+   source code for any covered work.
+
+2. AFFERO CLAUSE
+   If you offer access to the Program (modified or unmodified) to a third
+   party, you must provide a means for the third party to obtain the
+   corresponding source code. This applies even if modifications are not
+   made.
+
+3. DERIVATIVE WORKS
+   If you distribute modified versions of this program, you must clearly
+   mark the versions as modified and provide appropriate source code.
+
+---
+
+TERMS AND CONDITIONS
+
+0. Definitions
+
+   "This License" refers to version 3 of the GNU Affero General Public
+   License.
+
+   "Copyright" also means copyright-like laws that apply to other kinds
+   of works, such as semiconductor masks.
+
+   "The Program" refers to any copyrightable work licensed under this
+   License.
+
+   "You" refers to each licensee; "your" refers to you and any other
+   entity exercising rights under this License on your behalf.
+
+   "Licensee" means You and any other entity exercising rights under
+   this License.
+
+   "Convey" means to communicate to others or make available to the
+   public, by any means.
+
+   "Source code" for a work means the preferred form of the work for
+   making modifications to it.
+
+   "Object code" means any non-source form of a work.
+
+   "Standard Interface" means an interface that either is an official
+   standard defined by a recognized standards body, or, in the case of
+   interfaces specified for a particular programming language, one that
+   is widely used among developers working in that language.
+
+   "Corresponding Source" for a work in object code form means all the
+   source code needed to generate, install, and (for an executable work)
+   run the object code.
+
+   "Modified Version" means any derivative of the Program.
+
+1. Source Code
+
+   The "source code" for a work means the preferred form of the work
+   for making modifications to it. "Object code" means any non-source
+   form of a work.
+
+   A "Standard Interface" includes an interface that either is an
+   official standard defined by a recognized standards body, or, in the
+   case of interfaces specified for a particular programming language,
+   one that is widely used among developers working in that language.
+
+2. Copyleft
+
+   Each contributor grants you a non-exclusive, worldwide, royalty-free
+   copyright license to reproduce, prepare Derivative Works of, publicly
+   display, publicly perform, sublicense, and distribute the Contribution
+   and such Derivative Works in Source or Object form.
+
+3. Patent Grant
+
+   Subject to the terms and conditions of this License, each contributor
+   hereby grants to You a perpetual, worldwide, non-exclusive, no-charge,
+   royalty-free, irrevocable patent license to make, have made, use, offer
+   to sell, sell, import, and otherwise transfer the Work.
+
+4. Conveyance
+
+   You may convey a work based on the Program in object code form under
+   the terms of Sections 4 and 5, provided that you also convey the
+   machine-readable Corresponding Source code under the terms of this
+   License.
+
+5. Combined Works
+
+   You may convey a combined work under terms of your choice that, in
+   combination, do not effectively restrict modification of the portions
+   of the Library contained in the work and reverse engineering for
+   debugging such modifications.
+
+6. Compatibility
+
+   If the Program as you received it, or a Derivative Work, cannot be
+   conveyed with all necessary patent licenses under this License, then
+   you must either conspicuously mark the fact or (a) arrange, suitably
+   in the form of a private arrangement, to ensure the patent licenses
+   are included or available.
+
+---
+
+NO WARRANTY
+
+EXCEPT AS OTHERWISE PROVIDED HEREIN, THE PROGRAM IS PROVIDED ON AN "AS
+IS" BASIS, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,
+INCLUDING WITHOUT LIMITATION, ANY WARRANTY THAT THE PROGRAM IS FREE OF
+DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF ANY THIRD PARTY RIGHTS.
+
+---
+
+LIMITATION OF LIABILITY
+
+EXCEPT AS REQUIRED BY APPLICABLE LAW, IN NO EVENT SHALL ANY COPYRIGHT
+HOLDER BE LIABLE FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE
+PROGRAM, EVEN IF SUCH HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES.
+
+---
+
+TERMINATION
+
+Your rights under this License will terminate automatically without notice
+from us if you fail to comply with any term(s) of this License. However,
+if you cease all violation of this License, then your rights under this
+License from a particular Licensor will be reinstated.
+
+---
+
+INTERPRETATION
+
+If the disclaimer of warranty and limitation of liability provided above
+cannot be given local legal effect according to their terms, reviewing
+courts shall apply local law that most closely approximates an absolute
+waiver of all civil liability in connection with the Program.
+
+---
+
+ADDITIONAL PROVISIONS
+
+For more information about the GNU Affero General Public License, please
+visit: https://www.gnu.org/licenses/agpl-3.0.html
+
+---
+
+CONTACT
+
+For questions about this license or the Career Bridge AI project:
+- Email: legal@careerbridgeai.com
+- Website: https://careerbridgeai.com
+- GitHub: https://github.com/careerbridgeai
+
+---
+
+END OF TERMS AND CONDITIONS
+
+Career Bridge AI Contributors
+Version 1.0.0
+Last Updated: 2026-06-11

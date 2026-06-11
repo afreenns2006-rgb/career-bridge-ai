@@ -1,0 +1,129 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# ============================================
+# Default settings for all files
+# ============================================
+[*]
+# Character encoding
+charset = utf-8
+
+# Newline type
+end_of_line = lf
+
+# Insert final newline
+insert_final_newline = true
+
+# Trim trailing whitespace
+trim_trailing_whitespace = true
+
+# ============================================
+# Python files
+# ============================================
+[*.py]
+# Indent style
+indent_style = space
+
+# Indent size (PEP 8 recommends 4 spaces)
+indent_size = 4
+
+# Max line length (PEP 8 recommends 79, but we use 100)
+max_line_length = 100
+
+# ============================================
+# YAML files
+# ============================================
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# JSON files
+# ============================================
+[*.json]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# Markdown files
+# ============================================
+[*.md]
+# Don't trim trailing whitespace (markdown uses it for line breaks)
+trim_trailing_whitespace = false
+
+# ============================================
+# Shell scripts
+# ============================================
+[*.{sh,bash}]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# Dockerfile
+# ============================================
+[Dockerfile]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# .env files
+# ============================================
+[.env*]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# Configuration files
+# ============================================
+[*.{ini,cfg}]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# XML & SVG files
+# ============================================
+[*.{xml,svg}]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# CSS & SCSS files
+# ============================================
+[*.{css,scss,sass}]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# JavaScript & TypeScript files
+# ============================================
+[*.{js,jsx,ts,tsx}]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# SQL files
+# ============================================
+[*.sql]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# HTML files
+# ============================================
+[*.{html,htm}]
+indent_style = space
+indent_size = 2
+
+# ============================================
+# Makefile - Always use tabs
+# ============================================
+[Makefile]
+indent_style = tab
+
+# ============================================
+# Batch files - Keep as-is
+# ============================================
+[*.{bat,cmd}]
+end_of_line = crlf
