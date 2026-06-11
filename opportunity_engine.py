@@ -61,7 +61,27 @@ class OpportunityEngine:
             logger.warning(f"Could not load opportunities CSV: {e}. Using defaults.")
             self.opportunities_df = pd.DataFrame(DEFAULT_OPPORTUNITIES)
         
+        logger.info("Available opportunity dataframe columns: %s", list(self.opportunities_df.columns))
         return self.opportunities_df
+    
+    def _resolve_column(self, *candidates: str) -> Optional[str]:
+        """
+        Return the first available dataframe column from the candidate names.
+        """
+        if self.opportunities_df is None:
+            self.load_opportunities()
+        
+        columns = set(self.opportunities_df.columns)
+        for column in candidates:
+            if column in columns:
+                return column
+        
+        logger.warning(
+            "Missing expected opportunity column. Tried %s. Available columns: %s",
+            candidates,
+            list(self.opportunities_df.columns)
+        )
+        return None
     
     def recommend_opportunities(
         self,
@@ -94,10 +114,20 @@ class OpportunityEngine:
         
         recommendations = []
         user_skills_lower = [s.lower() for s in user_skills]
+        name_column = self._resolve_column("name", "title", "opportunity_name")
+        skills_column = self._resolve_column("skills", "skill", "required_skills")
+        type_column = self._resolve_column("type", "category", "opportunity_type")
+        category_column = self._resolve_column("category")
+        stipend_column = self._resolve_column("stipend", "prize")
+        deadline_column = self._resolve_column("deadline", "date")
+        link_column = self._resolve_column("application_link", "link")
+        
+        if not name_column or not skills_column:
+            return recommendations
         
         for _, opp_row in self.opportunities_df.iterrows():
-            opp_name = opp_row.get("name", "")
-            required_skills_str = opp_row.get("skills", "")
+            opp_name = opp_row.get(name_column, "")
+            required_skills_str = opp_row.get(skills_column, "")
             required_skills = [s.strip() for s in str(required_skills_str).split(",")]
             
             # Calculate skill match
@@ -108,14 +138,18 @@ class OpportunityEngine:
             if skill_match >= 50:
                 recommendations.append({
                     "opportunity_name": opp_name,
-                    "opportunity_type": opp_row.get("type", ""),
-                    "category": opp_row.get("category", ""),
+                    "opportunity_type": opp_row.get(type_column, "") if type_column else "",
+                    "category": opp_row.get(category_column, "") if category_column else "",
                     "match_score": round(skill_match, 1),
                     "required_skills": required_skills,
                     "matching_skills": [s for s in required_skills if s.lower() in user_skills_lower],
-                    "stipend_or_prize": opp_row.get("stipend") or opp_row.get("prize", 0),
-                    "deadline": opp_row.get("deadline", ""),
-                    "application_link": f"https://opportunities.example.com/{opp_name.replace(' ', '-').lower()}"
+                    "stipend_or_prize": opp_row.get(stipend_column, 0) if stipend_column else 0,
+                    "deadline": opp_row.get(deadline_column, "") if deadline_column else "",
+                    "application_link": (
+                        opp_row.get(link_column, "")
+                        if link_column
+                        else f"https://opportunities.example.com/{opp_name.replace(' ', '-').lower()}"
+                    )
                 })
         
         return sorted(recommendations, key=lambda x: x.get("match_score", 0), reverse=True)
@@ -140,26 +174,70 @@ class OpportunityEngine:
         if self.opportunities_df is None:
             self.load_opportunities()
         
-        # Search by name
-        results = self.opportunities_df[
-            self.opportunities_df["name"].str.contains(query, case=False, na=False) |
-            self.opportunities_df["skills"].str.contains(query, case=False, na=False)
-        ]
+        logger.info("Available opportunity dataframe columns: %s", list(self.opportunities_df.columns))
+        
+        name_column = self._resolve_column("name", "title", "opportunity_name")
+        skills_column = self._resolve_column("skills", "skill", "required_skills")
+        
+        if "name" not in self.opportunities_df.columns:
+            logger.info(
+                "'name' column not found in opportunities dataframe. Using '%s' as the opportunity name column.",
+                name_column
+            )
+        
+        if not name_column:
+            return []
+        
+        query = query or ""
+        name_matches = self.opportunities_df[name_column].astype(str).str.contains(
+            query,
+            case=False,
+            na=False
+        )
+        
+        if skills_column:
+            skills_matches = self.opportunities_df[skills_column].astype(str).str.contains(
+                query,
+                case=False,
+                na=False
+            )
+            search_mask = name_matches | skills_matches
+        else:
+            search_mask = name_matches
+        
+        results = self.opportunities_df[search_mask]
         
         # Apply filters
         if filters:
-            if "category" in filters:
-                results = results[results["category"].str.lower() == filters["category"].lower()]
-            if "type" in filters:
-                results = results[results["type"].str.lower() == filters["type"].lower()]
+            category_column = self._resolve_column("category")
+            type_column = self._resolve_column("type", "category", "opportunity_type")
+            
+            if "category" in filters and category_column:
+                results = results[
+                    results[category_column].astype(str).str.lower() == filters["category"].lower()
+                ]
+            if "type" in filters and type_column:
+                results = results[
+                    results[type_column].astype(str).str.lower() == filters["type"].lower()
+                ]
+        
+        type_column = self._resolve_column("type", "category", "opportunity_type")
+        category_column = self._resolve_column("category")
+        deadline_column = self._resolve_column("deadline", "date")
+        link_column = self._resolve_column("application_link", "link")
         
         return [
             {
-                "name": row.get("name", ""),
-                "type": row.get("type", ""),
-                "category": row.get("category", ""),
-                "skills": row.get("skills", ""),
-                "deadline": row.get("deadline", "")
+                "opportunity_name": row.get(name_column, ""),
+                "opportunity_type": row.get(type_column, "") if type_column else "",
+                "category": row.get(category_column, "") if category_column else "",
+                "required_skills": [
+                    skill.strip()
+                    for skill in str(row.get(skills_column, "")).split(",")
+                    if skill.strip()
+                ] if skills_column else [],
+                "deadline": row.get(deadline_column, "") if deadline_column else "",
+                "application_link": row.get(link_column, "") if link_column else ""
             }
             for _, row in results.iterrows()
         ]

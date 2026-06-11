@@ -65,8 +65,8 @@ def initialize_session_state() -> None:
     if "resume_data" not in st.session_state:
         st.session_state.resume_data = None
     
-    if "career_recommendations" not in st.session_state:
-        st.session_state.career_recommendations = []
+    if "career_recommendations_data" not in st.session_state:
+        st.session_state.career_recommendations_data = []
     
     if "scholarship_recommendations" not in st.session_state:
         st.session_state.scholarship_recommendations = []
@@ -349,7 +349,7 @@ def render_career_mentor() -> None:
         default=st.session_state.resume_data.get("skills", []) if st.session_state.resume_data else []
     )
     
-    if st.button("Get Career Recommendations", key="career_recommendations"):
+    if st.button("Get Career Recommendations", key="career_recommendations_widget"):
         with st.spinner("Generating career recommendations..."):
             career_engine = CareerRecommendationEngine()
             recommendations = career_engine.recommend_careers(
@@ -358,7 +358,7 @@ def render_career_mentor() -> None:
                 experience_years=experience_years
             )
         
-        st.session_state.career_recommendations = recommendations
+        st.session_state.career_recommendations_data = recommendations
         
         if recommendations:
             st.success(f"✅ Found {len(recommendations)} career recommendations!")
