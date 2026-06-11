@@ -1,0 +1,148 @@
+# Career Bridge AI - Python Requirements
+# Production Dependencies
+
+# ============================================
+# Core Framework
+# ============================================
+
+# Streamlit for web interface
+streamlit==1.28.0
+
+# ============================================
+# Data Processing & Analysis
+# ============================================
+
+# Pandas for data manipulation
+pandas==2.0.3
+
+# NumPy for numerical operations
+numpy==1.24.3
+
+# ============================================
+# Natural Language Processing
+# ============================================
+
+# spaCy for NLP tasks
+spacy==3.7.2
+
+# Sentence Transformers for semantic embeddings
+sentence-transformers==2.2.2
+
+# NLTK for text processing
+nltk==3.8.1
+
+# TextBlob for simple text processing
+textblob==0.17.1
+
+# ============================================
+# Machine Learning
+# ============================================
+
+# Scikit-learn for ML algorithms
+scikit-learn==1.3.0
+
+# XGBoost for gradient boosting (optional)
+xgboost==1.7.6
+
+# ============================================
+# PDF & Document Processing
+# ============================================
+
+# PyPDF for PDF text extraction
+pypdf==3.17.1
+
+# python-docx for DOCX parsing
+python-docx==0.8.11
+
+# ============================================
+# Database
+# ============================================
+
+# sqlite3 is built-in, but we can use better drivers
+# No additional package needed for SQLite
+
+# ============================================
+# Environment & Configuration
+# ============================================
+
+# Python-dotenv for environment variables
+python-dotenv==1.0.0
+
+# ============================================
+# Web & API
+# ============================================
+
+# Requests for HTTP requests
+requests==2.31.0
+
+# ============================================
+# Utilities
+# ============================================
+
+# Python-dateutil for date handling
+python-dateutil==2.8.2
+
+# PyYAML for YAML parsing
+PyYAML==6.0
+
+# Tqdm for progress bars
+tqdm==4.66.1
+
+# Click for CLI (if needed later)
+click==8.1.7
+
+# ============================================
+# Logging
+# ============================================
+
+# Python-json-logger for JSON logging
+python-json-logger==2.0.7
+
+# ============================================
+# Security
+# ============================================
+
+# Bcrypt for password hashing
+bcrypt==4.0.1
+
+# PyJWT for JWT tokens
+PyJWT==2.8.1
+
+# ============================================
+# Async & Background Tasks
+# ============================================
+
+# APScheduler for scheduled tasks (future)
+APScheduler==3.10.4
+
+# ============================================
+# Visualization (for future use)
+# ============================================
+
+# Plotly for interactive charts
+plotly==5.17.0
+
+# Matplotlib for static charts
+matplotlib==3.7.2
+
+# Seaborn for statistical visualization
+seaborn==0.12.2
+
+# ============================================
+# Testing & Quality Assurance
+# ============================================
+
+# Pytest for unit testing
+pytest==7.4.2
+
+# Pytest-cov for coverage reports
+pytest-cov==4.1.0
+
+# ============================================
+# Notes
+# ============================================
+
+# Installation: pip install -r requirements.txt
+# For development: pip install -r requirements.txt -r requirements-dev.txt
+# To freeze current environment: pip freeze > requirements.txt
+# To update packages: pip install -r requirements.txt --upgrade
