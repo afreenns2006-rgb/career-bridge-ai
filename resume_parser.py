@@ -8,9 +8,31 @@ and ATS scoring.
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 import logging
+import re
+from collections import Counter
+
+try:
+    import PyPDF2
+except ImportError:
+    PyPDF2 = None
+
+try:
+    from docx import Document
+except ImportError:
+    Document = None
 
 logger = logging.getLogger(__name__)
 
+# Common skills list for extraction
+COMMON_SKILLS = {
+    "python", "java", "javascript", "c++", "c#", "php", "ruby", "go", "rust", "kotlin",
+    "sql", "mongodb", "postgresql", "mysql", "oracle", "redis", "elasticsearch",
+    "react", "angular", "vue", "node.js", "django", "flask", "fastapi", "spring",
+    "aws", "azure", "gcp", "docker", "kubernetes", "git", "jenkins", "terraform",
+    "machine learning", "deep learning", "nlp", "computer vision", "tensorflow", "pytorch",
+    "html", "css", "rest api", "graphql", "microservices", "agile", "scrum",
+    "communication", "leadership", "teamwork", "problem solving", "data analysis"
+}
 
 class ResumeParser:
     """
@@ -32,7 +54,6 @@ class ResumeParser:
         self.file_path = file_path
         self.text: Optional[str] = None
         self.metadata: Dict[str, Any] = {}
-        pass
     
     def extract_text(self) -> str:
         """
@@ -50,7 +71,68 @@ class ResumeParser:
             
         TODO: Implement text extraction from multiple formats.
         """
-        pass
+        if not self.file_path.exists():
+            raise FileNotFoundError(f"Resume file not found: {self.file_path}")
+        
+        file_ext = self.file_path.suffix.lower()
+        
+        try:
+            if file_ext == ".pdf":
+                self.text = self._extract_from_pdf()
+            elif file_ext == ".docx":
+                self.text = self._extract_from_docx()
+            elif file_ext == ".txt":
+                self.text = self._extract_from_txt()
+            else:
+                raise ValueError(f"Unsupported file format: {file_ext}")
+            
+            return self.text if self.text else ""
+        except Exception as e:
+            logger.error(f"Error extracting text from resume: {e}")
+            raise
+    
+    def _extract_from_pdf(self) -> str:
+        """Extract text from PDF file."""
+        if not PyPDF2:
+            logger.warning("PyPDF2 not installed. Cannot extract PDF.")
+            return ""
+        
+        text = ""
+        try:
+            with open(self.file_path, 'rb') as file:
+                reader = PyPDF2.PdfReader(file)
+                for page_num in range(len(reader.pages)):
+                    page = reader.pages[page_num]
+                    text += page.extract_text() + "\n"
+        except Exception as e:
+            logger.error(f"Error reading PDF: {e}")
+        
+        return text
+    
+    def _extract_from_docx(self) -> str:
+        """Extract text from DOCX file."""
+        if not Document:
+            logger.warning("python-docx not installed. Cannot extract DOCX.")
+            return ""
+        
+        text = ""
+        try:
+            doc = Document(self.file_path)
+            for paragraph in doc.paragraphs:
+                text += paragraph.text + "\n"
+        except Exception as e:
+            logger.error(f"Error reading DOCX: {e}")
+        
+        return text
+    
+    def _extract_from_txt(self) -> str:
+        """Extract text from TXT file."""
+        try:
+            with open(self.file_path, 'r', encoding='utf-8') as file:
+                return file.read()
+        except Exception as e:
+            logger.error(f"Error reading TXT: {e}")
+            return ""
     
     def extract_skills(self) -> List[str]:
         """
@@ -64,7 +146,17 @@ class ResumeParser:
             
         TODO: Implement skill extraction using spaCy/Sentence Transformers.
         """
-        pass
+        if not self.text:
+            self.extract_text()
+        
+        text_lower = self.text.lower() if self.text else ""
+        found_skills = set()
+        
+        for skill in COMMON_SKILLS:
+            if skill in text_lower:
+                found_skills.add(skill)
+        
+        return list(found_skills)
     
     def extract_education(self) -> List[Dict[str, str]]:
         """
@@ -75,7 +167,20 @@ class ResumeParser:
             
         TODO: Implement education extraction.
         """
-        pass
+        if not self.text:
+            self.extract_text()
+        
+        education_list = []
+        education_keywords = ['b.tech', 'b.sc', 'm.tech', 'mca', 'mba', 'bachelor', 'master', 'degree']
+        
+        text_lower = self.text.lower() if self.text else ""
+        
+        # Simple extraction based on keywords
+        for keyword in education_keywords:
+            if keyword in text_lower:
+                education_list.append({"type": keyword, "mentioned": True})
+        
+        return education_list
     
     def extract_experience(self) -> List[Dict[str, str]]:
         """
@@ -86,7 +191,20 @@ class ResumeParser:
             
         TODO: Implement experience extraction.
         """
-        pass
+        if not self.text:
+            self.extract_text()
+        
+        experience_list = []
+        
+        # Simple extraction based on common job titles
+        job_titles = ['developer', 'engineer', 'analyst', 'manager', 'consultant', 'designer', 'lead']
+        text_lower = self.text.lower() if self.text else ""
+        
+        for title in job_titles:
+            if title in text_lower:
+                experience_list.append({"title": title, "mentioned": True})
+        
+        return experience_list
     
     def calculate_ats_score(self) -> float:
         """
@@ -100,7 +218,54 @@ class ResumeParser:
             
         TODO: Implement ATS scoring algorithm.
         """
-        pass
+        if not self.text:
+            self.extract_text()
+        
+        score = 0.0
+        text = self.text if self.text else ""
+        text_lower = text.lower()
+        
+        # Content length check
+        if len(text) > 500:
+            score += 10
+        if len(text) > 1000:
+            score += 10
+        
+        # Skills presence
+        skills = self.extract_skills()
+        score += min(len(skills) * 2, 20)
+        
+        # Education presence
+        education = self.extract_education()
+        if education:
+            score += 15
+        
+        # Experience presence
+        experience = self.extract_experience()
+        if experience:
+            score += 15
+        
+        # Email and contact info
+        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        if re.search(email_pattern, text):
+            score += 10
+        
+        # Phone number
+        phone_pattern = r'\b\d{10}\b|\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b'
+        if re.search(phone_pattern, text):
+            score += 5
+        
+        # Work keywords
+        work_keywords = ['experience', 'achieved', 'managed', 'developed', 'implemented']
+        keyword_count = sum(1 for kw in work_keywords if kw in text_lower)
+        score += keyword_count * 2
+        
+        # Formatting check (multiple lines, structure)
+        lines = text.split('\n')
+        if len(lines) > 10:
+            score += 10
+        
+        return min(score, 100.0)
     
     def get_resume_summary(self) -> Dict[str, Any]:
         """
@@ -111,7 +276,18 @@ class ResumeParser:
             
         TODO: Implement resume summary compilation.
         """
-        pass
+        if not self.text:
+            self.extract_text()
+        
+        return {
+            "filename": self.file_path.name,
+            "text_length": len(self.text) if self.text else 0,
+            "skills": self.extract_skills(),
+            "education": self.extract_education(),
+            "experience": self.extract_experience(),
+            "ats_score": self.calculate_ats_score(),
+            "extracted": bool(self.text)
+        }
     
     def validate_resume(self) -> bool:
         """
@@ -124,4 +300,25 @@ class ResumeParser:
             
         TODO: Implement validation checks.
         """
-        pass
+        # Check file exists
+        if not self.file_path.exists():
+            return False
+        
+        # Check file format
+        valid_formats = {".pdf", ".docx", ".txt"}
+        if self.file_path.suffix.lower() not in valid_formats:
+            return False
+        
+        # Check file size (max 10MB)
+        max_size = 10 * 1024 * 1024
+        if self.file_path.stat().st_size > max_size:
+            return False
+        
+        # Try to extract text
+        try:
+            text = self.extract_text()
+            if not text or len(text) < 100:
+                return False
+            return True
+        except Exception:
+            return False
