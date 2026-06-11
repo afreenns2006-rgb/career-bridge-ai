@@ -33,7 +33,8 @@ class DatabaseManager:
         TODO: Implement database initialization.
         """
         self.db_path = db_path
-        pass
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.create_tables()
     
     def get_connection(self) -> sqlite3.Connection:
         """
@@ -44,7 +45,13 @@ class DatabaseManager:
             
         TODO: Implement connection retrieval with timeout.
         """
-        pass
+        try:
+            conn = sqlite3.connect(str(self.db_path), timeout=DB_TIMEOUT)
+            conn.row_factory = sqlite3.Row
+            return conn
+        except sqlite3.Error as e:
+            logger.error(f"Database connection error: {e}")
+            raise
     
     def close_connection(self, connection: sqlite3.Connection) -> None:
         """
@@ -55,7 +62,11 @@ class DatabaseManager:
             
         TODO: Implement connection closing.
         """
-        pass
+        try:
+            if connection:
+                connection.close()
+        except sqlite3.Error as e:
+            logger.error(f"Error closing connection: {e}")
     
     def create_tables(self) -> None:
         """
@@ -70,7 +81,109 @@ class DatabaseManager:
             - opportunities
             - learning_roadmaps
         """
-        pass
+        tables_sql = """
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            education_level TEXT,
+            experience_years INTEGER,
+            state TEXT,
+            annual_income REAL,
+            category TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE TABLE IF NOT EXISTS resumes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            filename TEXT NOT NULL,
+            filepath TEXT NOT NULL,
+            extracted_text TEXT,
+            ats_score REAL,
+            skills TEXT,
+            education TEXT,
+            experience TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS career_recommendations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            career_name TEXT NOT NULL,
+            match_score REAL,
+            salary_range TEXT,
+            growth_potential TEXT,
+            skills_needed TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS scholarship_recommendations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            scholarship_name TEXT NOT NULL,
+            award_amount REAL,
+            eligibility_status TEXT,
+            application_deadline TEXT,
+            match_score REAL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS government_schemes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            scheme_name TEXT NOT NULL,
+            scheme_type TEXT,
+            benefit TEXT,
+            eligibility_status TEXT,
+            application_deadline TEXT,
+            match_score REAL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS opportunities (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            opportunity_name TEXT NOT NULL,
+            opportunity_type TEXT,
+            stipend REAL,
+            skills_required TEXT,
+            match_score REAL,
+            deadline TEXT,
+            application_link TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS learning_roadmaps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            target_career TEXT NOT NULL,
+            duration_months INTEGER,
+            skills_to_develop TEXT,
+            monthly_goals TEXT,
+            resources TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+        """
+        
+        conn = self.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.executescript(tables_sql)
+            conn.commit()
+            logger.info("Database tables created successfully")
+        except sqlite3.Error as e:
+            logger.error(f"Error creating tables: {e}")
+        finally:
+            conn.close()
     
     def execute_query(
         self,
@@ -91,7 +204,23 @@ class DatabaseManager:
             
         TODO: Implement query execution with error handling.
         """
-        pass
+        conn = self.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            
+            if fetch:
+                results = cursor.fetchall()
+                conn.close()
+                return results
+            else:
+                conn.commit()
+                conn.close()
+                return None
+        except sqlite3.Error as e:
+            logger.error(f"Query execution error: {e}")
+            conn.close()
+            raise
     
     def insert(
         self,
@@ -110,7 +239,23 @@ class DatabaseManager:
             
         TODO: Implement insert operation.
         """
-        pass
+        columns = ', '.join(data.keys())
+        placeholders = ', '.join(['?' for _ in data])
+        query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+        
+        conn = self.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, tuple(data.values()))
+            conn.commit()
+            last_id = cursor.lastrowid
+            return last_id
+        except sqlite3.Error as e:
+            logger.error(f"Insert error: {e}")
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
     
     def update(
         self,
@@ -131,7 +276,21 @@ class DatabaseManager:
             
         TODO: Implement update operation.
         """
-        pass
+        set_clause = ', '.join([f"{k} = ?" for k in data.keys()])
+        query = f"UPDATE {table} SET {set_clause} WHERE {condition}"
+        
+        conn = self.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, tuple(data.values()))
+            conn.commit()
+            return cursor.rowcount
+        except sqlite3.Error as e:
+            logger.error(f"Update error: {e}")
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
     
     def delete(
         self,
@@ -150,7 +309,20 @@ class DatabaseManager:
             
         TODO: Implement delete operation.
         """
-        pass
+        query = f"DELETE FROM {table} WHERE {condition}"
+        
+        conn = self.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query)
+            conn.commit()
+            return cursor.rowcount
+        except sqlite3.Error as e:
+            logger.error(f"Delete error: {e}")
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
     
     def select(
         self,
@@ -169,7 +341,12 @@ class DatabaseManager:
             
         TODO: Implement select operation.
         """
-        pass
+        query = f"SELECT * FROM {table}"
+        if condition:
+            query += f" WHERE {condition}"
+        
+        results = self.execute_query(query, fetch=True)
+        return results if results else []
 
 
 # Global database manager instance

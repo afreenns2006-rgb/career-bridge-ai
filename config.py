@@ -58,7 +58,16 @@ def ensure_directories() -> None:
     
     TODO: Implement directory creation.
     """
-    pass
+    directories = [
+        DATA_DIR,
+        UPLOADS_DIR,
+        MODELS_DIR,
+        ASSETS_DIR,
+        LOGS_DIR,
+        TESTS_DIR
+    ]
+    for directory in directories:
+        directory.mkdir(parents=True, exist_ok=True)
 
 
 def get_config() -> dict[str, any]:
@@ -70,4 +79,17 @@ def get_config() -> dict[str, any]:
         
     TODO: Implement configuration retrieval.
     """
-    pass
+    return {
+        "db_path": str(DB_PATH),
+        "db_timeout": DB_TIMEOUT,
+        "uploads_dir": str(UPLOADS_DIR),
+        "models_dir": str(MODELS_DIR),
+        "max_upload_size_mb": MAX_UPLOAD_SIZE_MB,
+        "allowed_formats": ALLOWED_UPLOAD_FORMATS,
+        "log_level": LOG_LEVEL,
+        "log_file": str(LOG_FILE),
+        "min_ats_score": MIN_ATS_SCORE,
+        "max_ats_score": MAX_ATS_SCORE,
+        "batch_size": DEFAULT_BATCH_SIZE,
+        "random_state": RANDOM_STATE
+    }
