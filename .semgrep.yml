@@ -1,0 +1,27 @@
+rules:
+  - id: career-bridge-no-eval
+    message: Avoid eval or exec in application code.
+    severity: ERROR
+    languages: [python]
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+
+  - id: career-bridge-no-hardcoded-secret-names
+    message: Potential hardcoded secret-like assignment. Use environment variables or .env.example placeholders.
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern: $NAME = "$VALUE"
+      - metavariable-regex:
+          metavariable: $NAME
+          regex: (?i).*(secret|password|token|api_key|apikey).*
+      - metavariable-regex:
+          metavariable: $VALUE
+          regex: .{12,}
+
+  - id: career-bridge-no-shell-true
+    message: Avoid shell=True unless command input is fully controlled and justified.
+    severity: WARNING
+    languages: [python]
+    pattern: subprocess.$FUNC(..., shell=True, ...)
