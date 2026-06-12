@@ -27,31 +27,31 @@ bandit_scan:
   script:
     - bandit -r .
 
-    test:
-  stage: test
-  image: python:3.11
+  test:
+    stage: test
+    image: python:3.11
 
-  before_script:
+    before_script:
     - pip install pytest pytest-cov coverage
 
-  script:
+    script:
     - pytest tests --cov=. --cov-report=term-missing --cov-fail-under=70
 
   coverage: '/TOTAL.*\s+(\d+%)/'
 
   pre_commit:
-  stage: quality
-  image: python:3.11
+     stage: quality
+     image: python:3.11
 
-  before_script:
+     before_script:
     - pip install pre-commit
 
-  script:
+      script:
     - pre-commit run --all-files
-    git_cliff:
-  stage: quality
-  image: rust:latest
+  git_cliff:
+      stage: quality
+      image: rust:latest
 
-  script:
+      script:
     - cargo install git-cliff || true
     - git-cliff --version
