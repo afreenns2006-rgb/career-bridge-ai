@@ -53,6 +53,7 @@ git_cliff:
   script:
     - cargo install git-cliff || true
     - git-cliff --version
+
 lint:
   stage: lint
   image: python:3.11
