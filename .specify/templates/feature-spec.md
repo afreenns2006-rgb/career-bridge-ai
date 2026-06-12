@@ -1,25 +1,24 @@
 # Feature Specification
 
-## Feature Name
+## Feature Overview
 
-[Feature Name]
+Describe the feature.
 
-## Overview
+## Problem Statement
 
-Describe the purpose of the feature.
+Describe the problem being solved.
 
 ## Requirements
 
 * Requirement 1
 * Requirement 2
-* Requirement 3
 
 ## Acceptance Criteria
 
-* [ ] Criteria 1
-* [ ] Criteria 2
-* [ ] Criteria 3
+* [ ] Requirement completed
+* [ ] Tests added
+* [ ] Documentation updated
 
-## Risks
+## Notes
 
-List any risks associated with implementation.
+Additional implementation notes.
