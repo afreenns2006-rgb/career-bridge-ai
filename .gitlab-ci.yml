@@ -1,6 +1,7 @@
 stages:
   - test
   - security
+  - quality
 
 gitleaks_scan:
   stage: security
@@ -37,3 +38,20 @@ bandit_scan:
     - pytest tests --cov=. --cov-report=term-missing --cov-fail-under=70
 
   coverage: '/TOTAL.*\s+(\d+%)/'
+
+  pre_commit:
+  stage: quality
+  image: python:3.11
+
+  before_script:
+    - pip install pre-commit
+
+  script:
+    - pre-commit run --all-files
+    git_cliff:
+  stage: quality
+  image: rust:latest
+
+  script:
+    - cargo install git-cliff || true
+    - git-cliff --version
