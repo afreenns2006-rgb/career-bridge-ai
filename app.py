@@ -4,17 +4,34 @@ Career Bridge AI - Main Streamlit Application
 A comprehensive AI-powered student career guidance platform providing
 resume analysis, career recommendations, scholarship finder, government
 scheme recommendations, opportunity discovery, and learning roadmaps.
+
+Features:
+- AI-powered Career Assistant (Ollama + BYOK support)
+- Multilingual support (English, Hindi, Telugu)
+- Resume analysis with ATS scoring
+- Career recommendations
+- Scholarship finder
+- Government scheme recommender
+- Opportunity discovery
+- Personalized learning roadmap
 """
 
 import streamlit as st
 from pathlib import Path
 import logging
+import os
+from dotenv import load_dotenv
 
 from config import (
     STREAMLIT_PAGE_TITLE,
     STREAMLIT_PAGE_ICON,
     STREAMLIT_LAYOUT,
-    ensure_directories
+    ensure_directories,
+    AI_PROVIDER,
+    OLLAMA_MODEL,
+    BYOK_API_KEY,
+    DEFAULT_LANGUAGE,
+    ENABLE_MULTILINGUAL
 )
 from database import get_db_manager
 from resume_parser import ResumeParser
@@ -23,6 +40,11 @@ from scholarship_engine import ScholarshipRecommendationEngine
 from scheme_engine import GovernmentSchemeEngine
 from opportunity_engine import OpportunityEngine
 from roadmap_engine import RoadmapGenerator
+from services.language import Language, get_text, get_supported_languages
+from services.ai_provider import create_ai_service, OllamaProvider
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -30,6 +52,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
 
 
 # Configure Streamlit page
@@ -45,11 +68,13 @@ def initialize_session_state() -> None:
     """
     Initialize Streamlit session state variables.
     
-    TODO: Implement session state initialization for:
+    Initializes:
         - User profile
         - Uploaded files
         - Recommendations
         - Learning plans
+        - Language settings
+        - AI provider settings
     """
     if "user_profile" not in st.session_state:
         st.session_state.user_profile = {
@@ -76,31 +101,59 @@ def initialize_session_state() -> None:
     
     if "learning_plan" not in st.session_state:
         st.session_state.learning_plan = None
+    
+    # Language and AI settings
+    if "language" not in st.session_state:
+        st.session_state.language = Language(DEFAULT_LANGUAGE)
+    
+    if "ai_provider" not in st.session_state:
+        st.session_state.ai_provider = AI_PROVIDER
+    
+    if "ai_service" not in st.session_state:
+        st.session_state.ai_service = None
+    
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
 
 def render_sidebar() -> str:
     """
-    Render sidebar navigation.
+    Render sidebar navigation with language selector and AI settings.
     
     Returns:
         Selected page name.
-        
-    TODO: Implement sidebar with page navigation links.
     """
-    st.sidebar.title("Career Bridge AI")
-    st.sidebar.write("Your Personal Career Guidance Platform")
+    st.sidebar.title(get_text("app_title", st.session_state.language))
+    st.sidebar.write(get_text("tagline", st.session_state.language))
     st.sidebar.divider()
     
+    # Language selector
+    if ENABLE_MULTILINGUAL:
+        st.sidebar.markdown("### " + get_text("language", st.session_state.language))
+        language_options = get_supported_languages()
+        selected_lang = st.sidebar.selectbox(
+            get_text("language", st.session_state.language),
+            options=list(language_options.keys()),
+            index=list(language_options.values()).index(st.session_state.language),
+            label_visibility="collapsed"
+        )
+        st.session_state.language = language_options[selected_lang]
+    
+    st.sidebar.divider()
+    
+    # Navigation menu
     page = st.sidebar.radio(
         "Navigation",
         options=[
-            "Home",
-            "Resume Analyzer",
-            "Career Mentor",
-            "Scholarship Finder",
-            "Government Schemes",
-            "Opportunities",
-            "Learning Roadmap"
+            get_text("home", st.session_state.language),
+            get_text("resume_analyzer", st.session_state.language),
+            get_text("career_mentor", st.session_state.language),
+            get_text("ai_assistant", st.session_state.language),
+            get_text("scholarship_finder", st.session_state.language),
+            get_text("government_schemes", st.session_state.language),
+            get_text("opportunities", st.session_state.language),
+            get_text("learning_roadmap", st.session_state.language),
+            get_text("settings", st.session_state.language)
         ],
         index=0
     )
@@ -821,11 +874,351 @@ def render_roadmap_generator() -> None:
                 st.success("Share link copied to clipboard!")
 
 
+def render_ai_assistant() -> None:
+    """
+    Render AI Career Assistant page.
+    
+    Provides AI-powered career guidance using Ollama or BYOK provider.
+    Features:
+    - Ask career questions
+    - Generate career roadmap
+    - Resume improvement tips
+    - Interview questions
+    - Skill recommendations
+    - Project suggestions
+    """
+    st.header(get_text("ai_assistant", st.session_state.language))
+    st.write("Ask career-related questions and get AI-powered insights")
+    
+    # Initialize AI service if not already done
+    if st.session_state.ai_service is None:
+        try:
+            if st.session_state.ai_provider.lower() == "ollama":
+                # Check if Ollama is running
+                ollama = OllamaProvider(OLLAMA_MODEL)
+                if not ollama.check_connection():
+                    st.error(get_text("ollama_not_running", st.session_state.language))
+                    st.info("To use Ollama, download it from: https://ollama.ai")
+                    return
+                st.session_state.ai_service = create_ai_service("ollama", OLLAMA_MODEL)
+            elif st.session_state.ai_provider.lower() == "byok":
+                if not BYOK_API_KEY:
+                    st.warning("BYOK provider configured but no API key found. Please configure in Settings.")
+                    return
+                st.session_state.ai_service = create_ai_service("byok", byok_api_key=BYOK_API_KEY)
+        except Exception as e:
+            st.error(f"Error initializing AI service: {e}")
+            return
+    
+    if st.session_state.ai_service is None:
+        st.error("AI service not available. Please check your settings.")
+        return
+    
+    # AI Assistant interface
+    st.markdown("### " + get_text("ask_question", st.session_state.language))
+    
+    # Tabs for different AI features
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "💬 Ask Question",
+        "🗺️ Career Roadmap",
+        "📝 Resume Tips",
+        "🎯 Interview Q&A",
+        "📚 Skills",
+        "💻 Projects"
+    ])
+    
+    with tab1:
+        st.markdown("#### Ask a Career Question")
+        question = st.text_area(
+            "Your question:",
+            placeholder="e.g., How can I transition from web development to machine learning?",
+            height=100
+        )
+        
+        if st.button("Get AI Response", key="ai_question"):
+            if question.strip():
+                with st.spinner("Generating response..."):
+                    try:
+                        response = st.session_state.ai_service.generate_career_advice(question)
+                        if response:
+                            st.success("✅ AI Response:")
+                            st.write(response)
+                            st.session_state.chat_history.append({
+                                "question": question,
+                                "response": response,
+                                "type": "career_advice"
+                            })
+                        else:
+                            st.error(get_text("ollama_connection_error", st.session_state.language))
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+            else:
+                st.warning("Please enter a question.")
+    
+    with tab2:
+        st.markdown("#### Generate Career Roadmap")
+        target_career = st.text_input("Target career:", placeholder="e.g., Data Scientist")
+        current_level = st.select_slider(
+            "Current skill level:",
+            options=["Beginner", "Intermediate", "Advanced"]
+        )
+        duration = st.slider("Timeline (months):", 1, 24, 6)
+        
+        if st.button("Generate Roadmap", key="ai_roadmap"):
+            if target_career.strip():
+                with st.spinner("Generating roadmap..."):
+                    try:
+                        roadmap = st.session_state.ai_service.generate_learning_roadmap(
+                            target_career, current_level, duration
+                        )
+                        if roadmap:
+                            st.success("✅ AI-Generated Roadmap:")
+                            st.write(roadmap)
+                        else:
+                            st.error(get_text("ollama_connection_error", st.session_state.language))
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+            else:
+                st.warning("Please enter a target career.")
+    
+    with tab3:
+        st.markdown("#### Get Resume Improvement Tips")
+        if st.session_state.resume_data and st.session_state.resume_data.get("text"):
+            resume_text = st.session_state.resume_data.get("text", "")
+            
+            if st.button("Analyze My Resume", key="ai_resume_tips"):
+                with st.spinner("Analyzing resume..."):
+                    try:
+                        tips = st.session_state.ai_service.generate_resume_tips(resume_text)
+                        if tips:
+                            st.success("✅ Resume Improvement Tips:")
+                            st.write(tips)
+                        else:
+                            st.error(get_text("ollama_connection_error", st.session_state.language))
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+        else:
+            st.info("Please upload and analyze your resume first in the Resume Analyzer section.")
+    
+    with tab4:
+        st.markdown("#### Get Interview Questions")
+        job_title = st.text_input("Target job title:", placeholder="e.g., Junior Software Engineer")
+        skills = st.multiselect(
+            "Your relevant skills:",
+            options=[
+                "Python", "Java", "JavaScript", "SQL", "Machine Learning",
+                "Web Development", "Cloud Computing", "Data Analysis"
+            ]
+        )
+        
+        if st.button("Generate Interview Questions", key="ai_interview"):
+            if job_title.strip() and skills:
+                with st.spinner("Generating questions..."):
+                    try:
+                        questions = st.session_state.ai_service.generate_interview_questions(
+                            job_title, skills
+                        )
+                        if questions:
+                            st.success("✅ Interview Questions & Tips:")
+                            st.write(questions)
+                        else:
+                            st.error(get_text("ollama_connection_error", st.session_state.language))
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+            else:
+                st.warning("Please enter job title and select at least one skill.")
+    
+    with tab5:
+        st.markdown("#### Get Skill Recommendations")
+        current_skills = st.multiselect(
+            "Your current skills:",
+            options=[
+                "Python", "Java", "JavaScript", "SQL", "Machine Learning",
+                "Web Development", "Cloud Computing", "Data Analysis",
+                "Communication", "Leadership", "Problem Solving"
+            ]
+        )
+        target_role = st.text_input("Target role:", placeholder="e.g., Data Scientist")
+        
+        if st.button("Get Skill Recommendations", key="ai_skills"):
+            if current_skills and target_role.strip():
+                with st.spinner("Analyzing skills..."):
+                    try:
+                        recommendations = st.session_state.ai_service.generate_skill_recommendations(
+                            current_skills, target_role
+                        )
+                        if recommendations:
+                            st.success("✅ Recommended Skills to Learn:")
+                            st.write(recommendations)
+                        else:
+                            st.error(get_text("ollama_connection_error", st.session_state.language))
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+            else:
+                st.warning("Please select skills and enter target role.")
+    
+    with tab6:
+        st.markdown("#### Get Project Suggestions")
+        skills = st.multiselect(
+            "Your skills:",
+            options=[
+                "Python", "Java", "JavaScript", "SQL", "Machine Learning",
+                "Web Development", "Cloud Computing", "Data Analysis",
+                "React", "Django", "Flask", "FastAPI"
+            ],
+            key="project_skills"
+        )
+        level = st.select_slider(
+            "Your experience level:",
+            options=["Beginner", "Intermediate", "Advanced"]
+        )
+        
+        if st.button("Get Project Ideas", key="ai_projects"):
+            if skills:
+                with st.spinner("Generating project ideas..."):
+                    try:
+                        projects = st.session_state.ai_service.generate_project_suggestions(
+                            skills, level
+                        )
+                        if projects:
+                            st.success("✅ Recommended Projects:")
+                            st.write(projects)
+                        else:
+                            st.error(get_text("ollama_connection_error", st.session_state.language))
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+            else:
+                st.warning("Please select at least one skill.")
+
+
+def render_settings() -> None:
+    """
+    Render Settings page.
+    
+    Allows users to configure:
+    - Language preferences
+    - AI provider selection
+    - Ollama model selection
+    - BYOK API key configuration
+    """
+    st.header(get_text("settings", st.session_state.language))
+    
+    st.markdown("### " + get_text("language", st.session_state.language))
+    
+    language_options = get_supported_languages()
+    selected_lang_name = st.selectbox(
+        "Select Language:",
+        options=list(language_options.keys()),
+        index=list(language_options.values()).index(st.session_state.language)
+    )
+    st.session_state.language = language_options[selected_lang_name]
+    st.success(f"Language set to: {selected_lang_name}")
+    
+    st.divider()
+    
+    st.markdown("### " + get_text("ai_provider", st.session_state.language))
+    
+    ai_provider = st.radio(
+        "Select AI Provider:",
+        options=[get_text("ollama", st.session_state.language), get_text("byok", st.session_state.language)],
+        index=0 if AI_PROVIDER.lower() == "ollama" else 1
+    )
+    
+    st.session_state.ai_service = None  # Reset AI service
+    
+    if get_text("ollama", st.session_state.language) in ai_provider:
+        st.markdown("#### Ollama Configuration")
+        st.info("Make sure Ollama is running at http://localhost:11434")
+        
+        # Display available models
+        ollama = OllamaProvider()
+        if ollama.check_connection():
+            st.success("✅ Ollama is running!")
+            
+            available_models = ollama.list_available_models()
+            if available_models:
+                st.write("Available models:", ", ".join(available_models))
+            
+            # Model selection
+            model_name = st.text_input(
+                "Model Name:",
+                value=OLLAMA_MODEL,
+                placeholder="e.g., llama3, mistral, neural-chat"
+            )
+            
+            if st.button("Test Connection"):
+                with st.spinner("Testing connection..."):
+                    test_response = ollama.generate("What is career guidance?", max_tokens=50)
+                    if test_response:
+                        st.success(f"✅ Connection successful!\nSample response: {test_response[:100]}...")
+                    else:
+                        st.error("Failed to get response from Ollama")
+        else:
+            st.error(get_text("ollama_not_running", st.session_state.language))
+            st.markdown("""
+            **How to set up Ollama:**
+            1. Download from https://ollama.ai
+            2. Install and run Ollama
+            3. Pull a model: `ollama pull llama3`
+            4. Ollama will run at http://localhost:11434
+            """)
+    
+    else:
+        st.markdown("#### BYOK Configuration")
+        st.warning("⚠️ Keep your API key secure. Never commit it to version control.")
+        
+        api_key = st.text_input(
+            get_text("api_key", st.session_state.language),
+            type="password",
+            placeholder="Enter your API key here",
+            value=BYOK_API_KEY if BYOK_API_KEY else ""
+        )
+        
+        provider_type = st.selectbox(
+            "Provider Type:",
+            options=["OpenAI", "Anthropic", "Other"],
+            index=0
+        )
+        
+        if api_key:
+            st.info("✅ API key configured (hidden for security)")
+            
+            if st.button("Test API Connection"):
+                st.info("API connection testing - Coming soon!")
+        else:
+            st.warning("No API key configured")
+        
+        st.markdown("""
+        **BYOK Setup Instructions:**
+        1. Get an API key from your provider
+        2. Paste it above
+        3. The key is stored only in your environment
+        4. Never commit .env to git
+        """)
+    
+    st.divider()
+    
+    st.markdown("### About")
+    st.write("Career Bridge AI v1.0")
+    st.write("An AI-powered career guidance platform for students")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("[GitHub](https://github.com/CareerBridgeAI)")
+    
+    with col2:
+        st.markdown("[Documentation](https://github.com/CareerBridgeAI/docs)")
+    
+    with col3:
+        st.markdown("[Support](mailto:support@careerbridgeai.com)")
+
+
 def main() -> None:
     """
     Main application entry point.
     
     Orchestrates page routing and application flow.
+    Routes user to appropriate page based on sidebar selection.
     """
     # Ensure directories exist
     ensure_directories()
@@ -839,21 +1232,36 @@ def main() -> None:
     # Render sidebar and get selected page
     page = render_sidebar()
     
+    # Define home page text in current language
+    home_text = get_text("home", st.session_state.language)
+    resume_text = get_text("resume_analyzer", st.session_state.language)
+    career_text = get_text("career_mentor", st.session_state.language)
+    ai_text = get_text("ai_assistant", st.session_state.language)
+    scholarship_text = get_text("scholarship_finder", st.session_state.language)
+    schemes_text = get_text("government_schemes", st.session_state.language)
+    opportunities_text = get_text("opportunities", st.session_state.language)
+    roadmap_text = get_text("learning_roadmap", st.session_state.language)
+    settings_text = get_text("settings", st.session_state.language)
+    
     # Route to selected page
-    if page == "Home":
+    if page == home_text:
         render_home_page()
-    elif page == "Resume Analyzer":
+    elif page == resume_text:
         render_resume_analyzer()
-    elif page == "Career Mentor":
+    elif page == career_text:
         render_career_mentor()
-    elif page == "Scholarship Finder":
+    elif page == ai_text:
+        render_ai_assistant()
+    elif page == scholarship_text:
         render_scholarship_finder()
-    elif page == "Government Schemes":
+    elif page == schemes_text:
         render_scheme_recommender()
-    elif page == "Opportunities":
+    elif page == opportunities_text:
         render_opportunity_dashboard()
-    elif page == "Learning Roadmap":
+    elif page == roadmap_text:
         render_roadmap_generator()
+    elif page == settings_text:
+        render_settings()
     else:
         render_home_page()
 
