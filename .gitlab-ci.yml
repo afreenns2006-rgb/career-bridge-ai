@@ -9,54 +9,45 @@ gitleaks_scan:
     name: zricethezav/gitleaks:latest
     entrypoint: [""]
   script:
-    - gitleaks detect --source . --verbose 
+    - gitleaks detect --source . --verbose
 
 pip_audit:
   stage: security
   image: python:3.11
-
   before_script:
     - pip install pip-audit
-
   script:
     - pip-audit
 
 bandit_scan:
   stage: security
   image: python:3.11
-
   before_script:
     - pip install bandit
-
   script:
     - bandit -r .
 
-  
-  test:
-    stage: test
-    image: python:3.11
-
-    before_script:
+test:
+  stage: test
+  image: python:3.11
+  before_script:
     - pip install pytest pytest-cov coverage
-
-    script:
+  script:
     - pytest tests --cov=. --cov-report=term-missing --cov-fail-under=70
-
   coverage: '/TOTAL.*\s+(\d+%)/'
 
-  pre_commit:
-     stage: quality
-     image: python:3.11
+pre_commit:
+  stage: quality
+  image: python:3.11
+  before_script:
+    - pip install pre-commit
+  script:
+    - pre-commit run --all-files
 
-     before_script:
-     - pip install pre-commit
-
-      script:
-     - pre-commit run --all-files
-  git_cliff:
-      stage: quality
-      image: rust:latest
-
-      script:
+git_cliff:
+  stage: quality
+  image: rust:latest
+  script:
     - cargo install git-cliff || true
     - git-cliff --version
+
