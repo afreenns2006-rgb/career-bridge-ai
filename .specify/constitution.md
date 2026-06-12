@@ -1,27 +1,29 @@
 # Project Constitution
 
-## Principles
+## Core Principles
 
-### 1. Code Quality
+### Documentation First
 
-All code contributions must follow project coding standards and pass automated checks before merging.
+All features must be documented before implementation.
 
-### 2. Testing
+### Testing First
 
-Every feature should include appropriate tests to ensure reliability and maintainability.
+All new functionality must include tests.
 
-### 3. Documentation
+### Security
 
-All significant changes must be documented in the project documentation.
+Sensitive information must never be committed to the repository.
 
-### 4. Security
+### Code Quality
 
-Security best practices must be followed. Secrets and credentials must never be committed.
+Code must pass linting, formatting, and quality checks.
 
-### 5. Collaboration
+### Collaboration
 
-Contributors should use pull requests and code reviews before merging changes.
+Changes should be reviewed before merging.
 
 ## Governance
 
-This constitution defines the development standards for the Career Bridge AI project and should be followed by all contributors.
+This constitution governs the development practices of the Career Bridge AI project.
+
+All contributors are expected to follow these principles.
