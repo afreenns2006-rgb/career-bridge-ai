@@ -7,7 +7,7 @@ throughout the application.
 
 import os
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 
 # Project root directory
 PROJECT_ROOT: Final[Path] = Path(__file__).parent
@@ -55,28 +55,21 @@ RANDOM_STATE: Final[int] = 42
 def ensure_directories() -> None:
     """
     Create necessary directories if they don't exist.
-    
+
     TODO: Implement directory creation.
     """
-    directories = [
-        DATA_DIR,
-        UPLOADS_DIR,
-        MODELS_DIR,
-        ASSETS_DIR,
-        LOGS_DIR,
-        TESTS_DIR
-    ]
+    directories = [DATA_DIR, UPLOADS_DIR, MODELS_DIR, ASSETS_DIR, LOGS_DIR, TESTS_DIR]
     for directory in directories:
         directory.mkdir(parents=True, exist_ok=True)
 
 
-def get_config() -> dict[str, any]:
+def get_config() -> dict[str, Any]:
     """
     Get application configuration as a dictionary.
-    
+
     Returns:
         dict: Configuration dictionary with all settings.
-        
+
     TODO: Implement configuration retrieval.
     """
     return {
@@ -91,5 +84,5 @@ def get_config() -> dict[str, any]:
         "min_ats_score": MIN_ATS_SCORE,
         "max_ats_score": MAX_ATS_SCORE,
         "batch_size": DEFAULT_BATCH_SIZE,
-        "random_state": RANDOM_STATE
+        "random_state": RANDOM_STATE,
     }

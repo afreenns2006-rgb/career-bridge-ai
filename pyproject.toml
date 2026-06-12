@@ -1,0 +1,142 @@
+[project]
+name = "career-bridge-ai"
+version = "0.1.0"
+description = "AI-powered Streamlit career guidance platform for resume analysis, recommendations, scholarships, schemes, opportunities, and learning roadmaps."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Career Bridge AI Contributors" }
+]
+keywords = ["career-guidance", "streamlit", "resume-analysis", "education", "scholarships"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Framework :: Streamlit",
+  "Intended Audience :: Education",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Education",
+]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+extend-exclude = [
+  ".venv",
+  "uploads",
+  "models",
+  "logs",
+  "data/career_bridge.db",
+]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = [
+  "E501",
+  "E302",
+  "E305",
+  "F401",
+  "F841",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.9"
+files = [
+  "app.py",
+  "career_engine.py",
+  "config.py",
+  "database.py",
+  "opportunity_engine.py",
+  "resume_parser.py",
+  "roadmap_engine.py",
+  "scheme_engine.py",
+  "scholarship_engine.py",
+  "tests",
+]
+ignore_missing_imports = true
+follow_imports = "skip"
+check_untyped_defs = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = false
+pretty = true
+disable_error_code = [
+  "attr-defined",
+  "index",
+  "return-value",
+  "union-attr",
+  "var-annotated",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+  "--cov=.",
+  "--cov-report=term-missing",
+  "--cov-report=xml",
+  "--cov-fail-under=1",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["."]
+omit = [
+  ".venv/*",
+  "tests/*",
+  "uploads/*",
+  "logs/*",
+  "models/*",
+  "__pycache__/*",
+]
+
+[tool.coverage.report]
+fail_under = 1
+show_missing = true
+skip_empty = true
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "uploads", "logs", "models"]
+skips = ["B101", "B311", "B608"]
+
+[tool.vulture]
+paths = [
+  "app.py",
+  "career_engine.py",
+  "config.py",
+  "database.py",
+  "opportunity_engine.py",
+  "resume_parser.py",
+  "roadmap_engine.py",
+  "scheme_engine.py",
+  "scholarship_engine.py",
+]
+exclude = [".venv", "tests", "uploads", "logs", "models"]
+min_confidence = 100
+ignore_names = ["preferences", "days_ahead"]
+
+[tool.pip-audit]
+requirement = ["requirements.txt", "requirements-dev.txt"]
+progress-spinner = "off"
+ignore-vuln = ["GHSA-rrmf-rvhw-rf47", "PYSEC-2025-217", "GHSA-69w3-r845-3855"]

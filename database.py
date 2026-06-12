@@ -18,31 +18,31 @@ logger = logging.getLogger(__name__)
 class DatabaseManager:
     """
     Manages SQLite database connections and operations.
-    
+
     Provides connection pooling, table creation, and CRUD operations
     for Career Bridge AI.
     """
-    
+
     def __init__(self, db_path: Path = DB_PATH) -> None:
         """
         Initialize database manager.
-        
+
         Args:
             db_path: Path to SQLite database file.
-            
+
         TODO: Implement database initialization.
         """
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.create_tables()
-    
+
     def get_connection(self) -> sqlite3.Connection:
         """
         Get a database connection.
-        
+
         Returns:
             sqlite3.Connection: Database connection object.
-            
+
         TODO: Implement connection retrieval with timeout.
         """
         try:
@@ -52,14 +52,14 @@ class DatabaseManager:
         except sqlite3.Error as e:
             logger.error(f"Database connection error: {e}")
             raise
-    
+
     def close_connection(self, connection: sqlite3.Connection) -> None:
         """
         Close a database connection.
-        
+
         Args:
             connection: Connection to close.
-            
+
         TODO: Implement connection closing.
         """
         try:
@@ -67,11 +67,11 @@ class DatabaseManager:
                 connection.close()
         except sqlite3.Error as e:
             logger.error(f"Error closing connection: {e}")
-    
+
     def create_tables(self) -> None:
         """
         Create all required database tables.
-        
+
         TODO: Implement table creation for:
             - users
             - resumes
@@ -173,7 +173,7 @@ class DatabaseManager:
             FOREIGN KEY (user_id) REFERENCES users(id)
         );
         """
-        
+
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
@@ -184,31 +184,26 @@ class DatabaseManager:
             logger.error(f"Error creating tables: {e}")
         finally:
             conn.close()
-    
-    def execute_query(
-        self,
-        query: str,
-        params: tuple = (),
-        fetch: bool = False
-    ) -> Optional[List[tuple]]:
+
+    def execute_query(self, query: str, params: tuple = (), fetch: bool = False) -> Optional[list[tuple]]:
         """
         Execute a database query.
-        
+
         Args:
             query: SQL query string.
             params: Query parameters for parameterized queries.
             fetch: Whether to fetch and return results.
-            
+
         Returns:
             List of tuples if fetch=True, None otherwise.
-            
+
         TODO: Implement query execution with error handling.
         """
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
             cursor.execute(query, params)
-            
+
             if fetch:
                 results = cursor.fetchall()
                 conn.close()
@@ -221,28 +216,24 @@ class DatabaseManager:
             logger.error(f"Query execution error: {e}")
             conn.close()
             raise
-    
-    def insert(
-        self,
-        table: str,
-        data: dict[str, Any]
-    ) -> int:
+
+    def insert(self, table: str, data: dict[str, Any]) -> int:
         """
         Insert a record into a table.
-        
+
         Args:
             table: Table name.
             data: Dictionary of column names and values.
-            
+
         Returns:
             ID of inserted record.
-            
+
         TODO: Implement insert operation.
         """
-        columns = ', '.join(data.keys())
-        placeholders = ', '.join(['?' for _ in data])
+        columns = ", ".join(data.keys())
+        placeholders = ", ".join(["?" for _ in data])
         query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-        
+
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
@@ -256,29 +247,24 @@ class DatabaseManager:
             raise
         finally:
             conn.close()
-    
-    def update(
-        self,
-        table: str,
-        data: dict[str, Any],
-        condition: str
-    ) -> int:
+
+    def update(self, table: str, data: dict[str, Any], condition: str) -> int:
         """
         Update records in a table.
-        
+
         Args:
             table: Table name.
             data: Dictionary of columns and new values.
             condition: WHERE clause condition.
-            
+
         Returns:
             Number of rows updated.
-            
+
         TODO: Implement update operation.
         """
-        set_clause = ', '.join([f"{k} = ?" for k in data.keys()])
+        set_clause = ", ".join([f"{k} = ?" for k in data.keys()])
         query = f"UPDATE {table} SET {set_clause} WHERE {condition}"
-        
+
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
@@ -291,26 +277,22 @@ class DatabaseManager:
             raise
         finally:
             conn.close()
-    
-    def delete(
-        self,
-        table: str,
-        condition: str
-    ) -> int:
+
+    def delete(self, table: str, condition: str) -> int:
         """
         Delete records from a table.
-        
+
         Args:
             table: Table name.
             condition: WHERE clause condition.
-            
+
         Returns:
             Number of rows deleted.
-            
+
         TODO: Implement delete operation.
         """
         query = f"DELETE FROM {table} WHERE {condition}"
-        
+
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
@@ -323,28 +305,24 @@ class DatabaseManager:
             raise
         finally:
             conn.close()
-    
-    def select(
-        self,
-        table: str,
-        condition: Optional[str] = None
-    ) -> List[tuple]:
+
+    def select(self, table: str, condition: Optional[str] = None) -> list[tuple]:
         """
         Select records from a table.
-        
+
         Args:
             table: Table name.
             condition: Optional WHERE clause condition.
-            
+
         Returns:
             List of records.
-            
+
         TODO: Implement select operation.
         """
         query = f"SELECT * FROM {table}"
         if condition:
             query += f" WHERE {condition}"
-        
+
         results = self.execute_query(query, fetch=True)
         return results if results else []
 
@@ -356,10 +334,10 @@ _db_manager: Optional[DatabaseManager] = None
 def get_db_manager() -> DatabaseManager:
     """
     Get or create global database manager instance.
-    
+
     Returns:
         DatabaseManager: Global database manager.
-        
+
     TODO: Implement singleton pattern.
     """
     global _db_manager
