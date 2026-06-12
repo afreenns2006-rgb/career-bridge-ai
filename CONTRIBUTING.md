@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to Career Bridge AI! This document provides guidelines and instructions for contributing to our project.
 
+Quality gates, security scanning, pre-commit setup, and coverage commands are documented in [docs/QUALITY.md](docs/QUALITY.md).
+
 ---
 
 ## Table of Contents
@@ -292,7 +294,7 @@ pytest tests/ -m "not slow"
 
 ### Test Coverage Requirements
 
-- Minimum 80% code coverage for new code
+- New code should include focused tests. The repository-wide CI threshold starts at 1% while baseline coverage is established.
 - All public functions should have tests
 - Edge cases should be covered
 
@@ -403,7 +405,7 @@ Fixes #123
 1. **At least 2 approvals required** before merging
 2. **All checks must pass**:
    - GitHub Actions (CI/CD)
-   - Code coverage (>80%)
+   - Code coverage reporting
    - Linting (flake8, pylint)
    - Tests (pytest)
 

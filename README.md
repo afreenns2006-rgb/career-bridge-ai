@@ -2,6 +2,14 @@
 
 A comprehensive AI-powered student career guidance platform that helps bridge the gap between students' current skills and their career aspirations.
 
+## Repository Metadata
+
+- **Description**: AI-powered Streamlit career guidance platform for resume analysis, recommendations, scholarships, schemes, opportunity discovery, and learning roadmaps.
+- **Package management**: `requirements.txt` for runtime dependencies and `requirements-dev.txt` for development tooling.
+- **Release tags**: use semantic tags such as `v0.1.0`; changelog previews are generated with Git-Cliff.
+
+For local linting, testing, security scanning, pre-commit usage, and changelog commands, see [docs/QUALITY.md](docs/QUALITY.md).
+
 ## ✨ Features
 
 ### 📄 Resume Analyzer
