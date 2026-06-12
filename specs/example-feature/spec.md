@@ -1,17 +1,19 @@
-# Example Feature Specification
+# Example Feature
 
 ## Summary
 
-This document demonstrates the Spec-Kit structure used in the project.
+Demonstrates Spec-Kit workflow.
 
-## Goals
+## Requirements
 
-- Maintain project standards
-- Improve development workflow
-- Ensure proper documentation
+- Feature specification exists
+- Documentation exists
 
 ## Acceptance Criteria
 
-- Spec file exists
-- Documentation exists
-- Templates are available
+- Spec file created
+- Compliance requirements satisfied
+
+## Status
+
+Completed
