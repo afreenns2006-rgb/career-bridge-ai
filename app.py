@@ -83,9 +83,6 @@ def initialize_session_state() -> None:
     if "learning_plan" not in st.session_state:
         st.session_state.learning_plan = None
 
-    if "selected_language" not in st.session_state:
-        st.session_state.selected_language = normalize_language(os.getenv("DEFAULT_LANGUAGE", "English"))
-
     if "ai_assistant_response" not in st.session_state:
         st.session_state.ai_assistant_response = ""
 
@@ -136,20 +133,30 @@ def render_language_selector() -> None:
     """Render the language selector in a deployment-safe way."""
     st.sidebar.divider()
     language_options = get_language_names()
-    selected_language = normalize_language(st.session_state.get("selected_language", "English"))
-    st.session_state.selected_language = selected_language
 
     try:
+        if "selected_language" in st.session_state:
+            if st.session_state.selected_language not in language_options:
+                del st.session_state["selected_language"]
+            else:
+                st.sidebar.selectbox(
+                    "🌐 Response Language",
+                    options=language_options,
+                    key="selected_language",
+                    help="AI Career Assistant responses will use this language.",
+                )
+                return
+
+        default_language = normalize_language(os.getenv("DEFAULT_LANGUAGE", "English"))
         st.sidebar.selectbox(
             "🌐 Response Language",
             options=language_options,
-            index=language_options.index(selected_language),
+            index=language_options.index(default_language),
             key="selected_language",
             help="AI Career Assistant responses will use this language.",
         )
     except Exception as exc:
         logger.warning("Language selector failed to render: %s", exc)
-        st.session_state.selected_language = "English"
         st.sidebar.warning("Language selector could not load. Using English for now.")
 
 
