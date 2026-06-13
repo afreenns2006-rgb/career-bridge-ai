@@ -1,20 +1,19 @@
-# Implementation Plan Template
+# Implementation Plan
 
 ## Objective
 
-Describe the objective.
+State the goal.
 
 ## Tasks
 
-1. Design
-2. Development
-3. Testing
-4. Documentation
+- Task 1
+- Task 2
 
-## Risks
+## Deliverables
 
-List risks.
+- Deliverable 1
+- Deliverable 2
 
 ## Completion Criteria
 
-All acceptance criteria are met.
+Describe how completion is measured.
