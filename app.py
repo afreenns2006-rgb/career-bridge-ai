@@ -6,22 +6,36 @@ resume analysis, career recommendations, scholarship finder, government
 scheme recommendations, opportunity discovery, and learning roadmaps.
 """
 
-import streamlit as st
-from pathlib import Path
 import logging
+import os
+from pathlib import Path
+
+import streamlit as st
+from dotenv import load_dotenv
 
 from config import STREAMLIT_PAGE_TITLE, STREAMLIT_PAGE_ICON, STREAMLIT_LAYOUT, ensure_directories
 from database import get_db_manager
-from resume_parser import ResumeParser
 from career_engine import CareerRecommendationEngine
+from opportunity_engine import OpportunityEngine
+from resume_parser import ResumeParser
+from roadmap_engine import RoadmapGenerator
 from scholarship_engine import ScholarshipRecommendationEngine
 from scheme_engine import GovernmentSchemeEngine
-from opportunity_engine import OpportunityEngine
-from roadmap_engine import RoadmapGenerator
+from services.ai_provider import (
+    DEFAULT_BYOK_ENDPOINT,
+    DEFAULT_BYOK_MODEL,
+    DEFAULT_OLLAMA_MODEL,
+    OLLAMA_GENERATE_URL,
+    AIProviderConfig,
+    generate_ai_response,
+)
+from services.language import get_language_names
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 
 # Configure Streamlit page
@@ -69,6 +83,12 @@ def initialize_session_state() -> None:
     if "learning_plan" not in st.session_state:
         st.session_state.learning_plan = None
 
+    if "selected_language" not in st.session_state:
+        st.session_state.selected_language = os.getenv("DEFAULT_LANGUAGE", "English")
+
+    if "ai_assistant_response" not in st.session_state:
+        st.session_state.ai_assistant_response = ""
+
 
 def render_sidebar() -> str:
     """
@@ -93,8 +113,21 @@ def render_sidebar() -> str:
             "Government Schemes",
             "Opportunities",
             "Learning Roadmap",
+            "AI Career Assistant",
         ],
         index=0,
+    )
+
+    st.sidebar.divider()
+    language_options = get_language_names()
+    if st.session_state.selected_language not in language_options:
+        st.session_state.selected_language = "English"
+    st.sidebar.selectbox(
+        "Language",
+        options=language_options,
+        index=language_options.index(st.session_state.selected_language),
+        key="selected_language",
+        help="AI assistant responses will use this language.",
     )
 
     st.sidebar.divider()
@@ -352,6 +385,7 @@ def render_career_mentor() -> None:
         ],
         default=st.session_state.resume_data.get("skills", []) if st.session_state.resume_data else [],
     )
+    st.session_state.user_profile["skills"] = skills_input
 
     if st.button("Get Career Recommendations", key="career_recommendations_widget"):
         with st.spinner("Generating career recommendations..."):
@@ -674,7 +708,7 @@ def render_roadmap_generator() -> None:
 
     with col2:
         duration_months = st.slider("Learning Duration (months)", min_value=1, max_value=24, value=6)
-        learning_pace = st.selectbox("Preferred Pace", ["Beginner", "Intermediate", "Advanced"])
+        st.selectbox("Preferred Pace", ["Beginner", "Intermediate", "Advanced"])
 
     st.markdown("---")
 
@@ -781,6 +815,100 @@ def render_roadmap_generator() -> None:
                 st.success("Share link copied to clipboard!")
 
 
+def render_ai_career_assistant() -> None:
+    """
+    Render AI-powered career assistant page.
+
+    Supports local Ollama, BYOK providers, and a rule-based fallback.
+    """
+    st.header("AI Career Assistant")
+    st.write("Ask career questions and get a roadmap, resume tips, interview questions, skills, and project ideas.")
+
+    language = st.session_state.get("selected_language", "English")
+
+    with st.expander("AI Provider Settings", expanded=True):
+        provider = st.radio(
+            "Provider",
+            ["Local Ollama", "BYOK", "Rule-based fallback"],
+            horizontal=True,
+            help="Use local Ollama, your own API key/token, or an offline fallback response.",
+        )
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if provider == "BYOK":
+                model_name = st.text_input(
+                    "Model name",
+                    value=os.getenv("BYOK_MODEL", DEFAULT_BYOK_MODEL),
+                    help="Use the model name supported by your provider.",
+                )
+            else:
+                model_name = st.text_input(
+                    "Ollama model name",
+                    value=os.getenv("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL),
+                    help="Default is llama3. Example: llama3, mistral, gemma.",
+                )
+
+        with col2:
+            if provider == "BYOK":
+                byok_endpoint = st.text_input(
+                    "BYOK API endpoint",
+                    value=os.getenv("BYOK_API_URL", DEFAULT_BYOK_ENDPOINT),
+                    help="OpenAI-compatible chat completions endpoint.",
+                )
+            else:
+                byok_endpoint = DEFAULT_BYOK_ENDPOINT
+                st.text_input(
+                    "Ollama API URL",
+                    value=os.getenv("OLLAMA_API_URL", OLLAMA_GENERATE_URL),
+                    key="ollama_url_input",
+                    help="Local Ollama generate endpoint.",
+                )
+
+        if provider == "BYOK":
+            api_token = st.text_input(
+                "API key/token",
+                value="",
+                type="password",
+                help="Your token is used only for this Streamlit session and is not saved in the repository.",
+            )
+            ollama_url = OLLAMA_GENERATE_URL
+        else:
+            api_token = ""
+            ollama_url = st.session_state.get("ollama_url_input", OLLAMA_GENERATE_URL)
+
+    st.markdown("### Your Question")
+    question = st.text_area(
+        "Ask anything career-related",
+        placeholder="Example: I know Python and SQL. How can I become a data analyst?",
+        height=130,
+    )
+
+    resume_skills = st.session_state.resume_data.get("skills", []) if st.session_state.resume_data else []
+    profile = {
+        **st.session_state.user_profile,
+        "skills": st.session_state.user_profile.get("skills") or resume_skills,
+    }
+
+    if st.button("Generate AI Guidance", key="generate_ai_guidance"):
+        config = AIProviderConfig(
+            provider=provider,
+            language=language,
+            model_name=model_name,
+            ollama_url=ollama_url,
+            api_token=api_token,
+            byok_endpoint=byok_endpoint,
+        )
+
+        with st.spinner("Generating career guidance..."):
+            st.session_state.ai_assistant_response = generate_ai_response(question, config, profile)
+
+    if st.session_state.ai_assistant_response:
+        st.markdown("---")
+        st.markdown("### AI Guidance")
+        st.markdown(st.session_state.ai_assistant_response)
+
+
 def main() -> None:
     """
     Main application entry point.
@@ -794,7 +922,7 @@ def main() -> None:
     initialize_session_state()
 
     # Initialize database
-    db_manager = get_db_manager()
+    get_db_manager()
 
     # Render sidebar and get selected page
     page = render_sidebar()
@@ -814,6 +942,8 @@ def main() -> None:
         render_opportunity_dashboard()
     elif page == "Learning Roadmap":
         render_roadmap_generator()
+    elif page == "AI Career Assistant":
+        render_ai_career_assistant()
     else:
         render_home_page()
 

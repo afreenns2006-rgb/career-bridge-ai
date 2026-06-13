@@ -10,6 +10,52 @@ A comprehensive AI-powered student career guidance platform that helps bridge th
 
 For local linting, testing, security scanning, pre-commit usage, and changelog commands, see [docs/QUALITY.md](docs/QUALITY.md).
 
+## AI Features, Multilingual Support, Ollama, and BYOK
+
+Career Bridge AI includes an AI Career Assistant page. Students can ask career-related questions and receive career roadmap guidance, resume improvement tips, interview questions, skill recommendations, and project suggestions.
+
+### Multilingual Support
+
+Use the sidebar language selector to choose English, Hindi, or Telugu. AI Career Assistant responses are generated in the selected language. Existing resume, career, scholarship, government scheme, opportunity, and roadmap features continue to work normally.
+
+### Local AI Inference with Ollama
+
+The app can call local Ollama at:
+
+```bash
+http://localhost:11434/api/generate
+```
+
+Install and run Ollama locally, then pull the default model:
+
+```bash
+ollama pull llama3
+ollama serve
+```
+
+In the app, open AI Career Assistant, choose Local Ollama, and use the default `llama3` model or enter another installed model name. If Ollama is not running, the app shows a friendly error message instead of crashing.
+
+### BYOK - Bring Your Own Key / Token
+
+Choose BYOK on the AI Career Assistant page to use your own API key or token.
+
+- The token field is a password input.
+- No real API key is hardcoded.
+- Do not commit real secrets.
+- `.env.example` contains placeholder values only.
+- The default BYOK endpoint is OpenAI-compatible: `https://api.openai.com/v1/chat/completions`.
+
+### Offline Fallback
+
+Choose Rule-based fallback if you do not want to use Ollama or an external provider. The app generates a simple offline career guidance response in the selected language.
+
+### Run the App
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
 ## ✨ Features
 
 ### 📄 Resume Analyzer
