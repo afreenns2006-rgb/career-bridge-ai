@@ -1,24 +1,25 @@
-# Feature Specification Template
+# Feature Specification
 
-## Title
+## Feature Name
 
-Feature title
+## Overview
+
+Describe the feature.
 
 ## Problem Statement
 
-Describe the problem.
-
-## Proposed Solution
-
-Describe the solution.
+What problem does this solve?
 
 ## Requirements
 
-* Requirement 1
-* Requirement 2
+- Requirement 1
+- Requirement 2
 
 ## Acceptance Criteria
 
-* [ ] Requirement satisfied
-* [ ] Tests added
-* [ ] Documentation updated
+- Criteria 1
+- Criteria 2
+
+## Notes
+
+Additional implementation notes.
