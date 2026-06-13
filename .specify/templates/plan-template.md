@@ -1,19 +1,31 @@
-# Implementation Plan
+# Career Bridge AI
 
-## Objective
+## Project Overview
+Career Bridge AI is an AI-powered career guidance platform that helps students, fresh graduates, and job seekers identify suitable career paths based on their skills and interests.
 
-State the goal.
+## Problem Statement
+Many students lack personalized career guidance and are unsure about the skills required for different career opportunities.
 
-## Tasks
+## Solution
+Career Bridge AI provides:
+- Career Recommendations
+- Resume Analysis
+- Skill Gap Analysis
+- Learning Recommendations
+- Multilingual Support
 
-- Task 1
-- Task 2
+## Target Users
+- Students
+- Fresh Graduates
+- Job Seekers
 
-## Deliverables
+## Technology Stack
+- Python
+- Streamlit
+- AI Models
+- Git & GitLab
 
-- Deliverable 1
-- Deliverable 2
-
-## Completion Criteria
-
-Describe how completion is measured.
+## Expected Outcomes
+- Better career planning
+- Improved employability
+- Personalized learning paths
