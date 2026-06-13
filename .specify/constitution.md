@@ -2,28 +2,21 @@
 
 ## Core Principles
 
-### Documentation First
-
+### 1. Documentation First
 All features must be documented before implementation.
 
-### Testing First
+### 2. Testing First
+Features should be tested before deployment.
 
-All new functionality must include tests.
+### 3. Security
+Security best practices must be followed throughout development.
 
-### Security
+### 4. Code Quality
+Code must be clean, readable, and maintainable.
 
-Sensitive information must never be committed to the repository.
-
-### Code Quality
-
-Code must pass linting, formatting, and quality checks.
-
-### Collaboration
-
-Changes should be reviewed before merging.
+### 5. Collaboration
+All contributions should be reviewed through pull requests.
 
 ## Governance
 
-This constitution governs the development practices of the Career Bridge AI project.
-
-All contributors are expected to follow these principles.
+These principles apply to all contributors and project activities.
