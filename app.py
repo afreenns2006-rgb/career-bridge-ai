@@ -29,7 +29,7 @@ from services.ai_provider import (
     AIProviderConfig,
     generate_ai_response,
 )
-from services.language import get_language_names
+from services.language import get_language_names, normalize_language
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -84,10 +84,13 @@ def initialize_session_state() -> None:
         st.session_state.learning_plan = None
 
     if "selected_language" not in st.session_state:
-        st.session_state.selected_language = os.getenv("DEFAULT_LANGUAGE", "English")
+        st.session_state.selected_language = normalize_language(os.getenv("DEFAULT_LANGUAGE", "English"))
 
     if "ai_assistant_response" not in st.session_state:
         st.session_state.ai_assistant_response = ""
+
+    if "ai_assistant_warning" not in st.session_state:
+        st.session_state.ai_assistant_warning = False
 
 
 def render_sidebar() -> str:
@@ -118,17 +121,7 @@ def render_sidebar() -> str:
         index=0,
     )
 
-    st.sidebar.divider()
-    language_options = get_language_names()
-    if st.session_state.selected_language not in language_options:
-        st.session_state.selected_language = "English"
-    st.sidebar.selectbox(
-        "Language",
-        options=language_options,
-        index=language_options.index(st.session_state.selected_language),
-        key="selected_language",
-        help="AI assistant responses will use this language.",
-    )
+    render_language_selector()
 
     st.sidebar.divider()
     st.sidebar.markdown("### Quick Links")
@@ -137,6 +130,27 @@ def render_sidebar() -> str:
     st.sidebar.markdown("[Contact Us](mailto:support@careerbridgeai.com)")
 
     return page
+
+
+def render_language_selector() -> None:
+    """Render the language selector in a deployment-safe way."""
+    st.sidebar.divider()
+    language_options = get_language_names()
+    selected_language = normalize_language(st.session_state.get("selected_language", "English"))
+    st.session_state.selected_language = selected_language
+
+    try:
+        st.sidebar.selectbox(
+            "🌐 Response Language",
+            options=language_options,
+            index=language_options.index(selected_language),
+            key="selected_language",
+            help="AI Career Assistant responses will use this language.",
+        )
+    except Exception as exc:
+        logger.warning("Language selector failed to render: %s", exc)
+        st.session_state.selected_language = "English"
+        st.sidebar.warning("Language selector could not load. Using English for now.")
 
 
 def render_home_page() -> None:
@@ -824,7 +838,8 @@ def render_ai_career_assistant() -> None:
     st.header("AI Career Assistant")
     st.write("Ask career questions and get a roadmap, resume tips, interview questions, skills, and project ideas.")
 
-    language = st.session_state.get("selected_language", "English")
+    language = normalize_language(st.session_state.get("selected_language", "English"))
+    st.info(f"Selected response language: **{language}**")
 
     with st.expander("AI Provider Settings", expanded=True):
         provider = st.radio(
@@ -902,11 +917,30 @@ def render_ai_career_assistant() -> None:
 
         with st.spinner("Generating career guidance..."):
             st.session_state.ai_assistant_response = generate_ai_response(question, config, profile)
+            st.session_state.ai_assistant_warning = is_ai_warning_response(st.session_state.ai_assistant_response)
 
     if st.session_state.ai_assistant_response:
         st.markdown("---")
         st.markdown("### AI Guidance")
+        if st.session_state.get("ai_assistant_warning"):
+            st.warning(st.session_state.ai_assistant_response)
+            return
         st.markdown(st.session_state.ai_assistant_response)
+
+
+def is_ai_warning_response(response: str) -> bool:
+    """Detect provider errors that should be shown as Streamlit warnings."""
+    warning_markers = [
+        "Please enter",
+        "I could not connect",
+        "I could not reach",
+        "took too long",
+        "returned an error",
+        "returned an HTTP error",
+        "returned an invalid response",
+        "returned an empty response",
+    ]
+    return any(marker in response for marker in warning_markers)
 
 
 def main() -> None:

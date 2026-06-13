@@ -15,15 +15,29 @@ SUPPORTED_LANGUAGES = {
     },
 }
 
+DEFAULT_LANGUAGE = "English"
+
 
 def get_language_names() -> list[str]:
     """Return display names for supported languages."""
     return list(SUPPORTED_LANGUAGES.keys())
 
 
+def normalize_language(language: str | None) -> str:
+    """Return a supported language name with a safe fallback."""
+    if language in SUPPORTED_LANGUAGES:
+        return language
+    return DEFAULT_LANGUAGE
+
+
 def get_language_instruction(language: str) -> str:
     """Return an instruction that can be added to an AI prompt."""
-    return SUPPORTED_LANGUAGES.get(language, SUPPORTED_LANGUAGES["English"])["instruction"]
+    return SUPPORTED_LANGUAGES[normalize_language(language)]["instruction"]
+
+
+def get_language_code(language: str) -> str:
+    """Return a stable language code for a supported language."""
+    return SUPPORTED_LANGUAGES[normalize_language(language)]["code"]
 
 
 def build_rule_based_response(question: str, language: str) -> str:
