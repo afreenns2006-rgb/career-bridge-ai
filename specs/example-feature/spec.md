@@ -2,17 +2,23 @@
 
 ## Summary
 
-Demonstrates Spec-Kit workflow.
+This feature demonstrates the Spec-Kit workflow.
+
+## Problem Statement
+
+A sample feature specification is required for compliance validation.
 
 ## Requirements
 
 - Feature specification exists
-- Documentation exists
+- Documentation is available
+- Acceptance criteria are defined
 
 ## Acceptance Criteria
 
 - Spec file created
-- Compliance requirements satisfied
+- Documentation completed
+- Compliance checker detects the feature spec
 
 ## Status
 
