@@ -1,468 +1,377 @@
-# Career Bridge AI 🎓
+# 🎓 Career Bridge AI
 
-A comprehensive AI-powered student career guidance platform that helps bridge the gap between students' current skills and their career aspirations.
+> **AI-powered career guidance platform that helps students, fresh graduates, and job seekers move from confusion to a clear career plan.**
 
-## Repository Metadata
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Pandas](https://img.shields.io/badge/Pandas-Data-150458?style=for-the-badge&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![Scikit-learn](https://img.shields.io/badge/Scikit--learn-ML-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-- **Description**: AI-powered Streamlit career guidance platform for resume analysis, recommendations, scholarships, schemes, opportunity discovery, and learning roadmaps.
-- **Package management**: `requirements.txt` for runtime dependencies and `requirements-dev.txt` for development tooling.
-- **Release tags**: use semantic tags such as `v0.1.0`; changelog previews are generated with Git-Cliff.
+## 🚀 Live Demo
 
-For local linting, testing, security scanning, pre-commit usage, and changelog commands, see [docs/QUALITY.md](docs/QUALITY.md).
+| Resource | Link |
+|---|---|
+| 🌐 Live App | [Open Career Bridge AI](https://careerbridgeai-3kkasz5pd3ad7fzfry39e3.streamlit.app) |
+| 💻 GitHub Repository | [github.com/afreenns2006-rgb/career-bridge-ai](https://github.com/afreenns2006-rgb/career-bridge-ai) |
 
-## AI Features, Multilingual Support, Ollama, and BYOK
+---
 
-Career Bridge AI includes an AI Career Assistant page. Students can ask career-related questions and receive career roadmap guidance, resume improvement tips, interview questions, skill recommendations, and project suggestions.
+## 📌 Problem Statement
 
-### Multilingual Support
+Many students and fresh graduates struggle to make informed career decisions. They often do not know:
 
-Use the sidebar language selector to choose English, Hindi, or Telugu. AI Career Assistant responses are generated in the selected language. Existing resume, career, scholarship, government scheme, opportunity, and roadmap features continue to work normally.
+- whether their resume is job-ready,
+- which career path matches their current skills,
+- what skills they should learn next,
+- where to find scholarships, schemes, internships, and opportunities,
+- how to prepare for interviews and build relevant projects.
 
-### Local AI Inference with Ollama
+Career guidance is often scattered across different websites and platforms. This makes the process time-consuming, confusing, and inaccessible for many learners.
 
-The app can call local Ollama at:
+---
 
-```bash
-http://localhost:11434/api/generate
+## 💡 Proposed Solution
+
+**Career Bridge AI** brings career planning, resume feedback, opportunity discovery, learning guidance, and AI assistance into one beginner-friendly Streamlit app.
+
+The platform helps users:
+
+- analyze resumes,
+- discover suitable careers,
+- find scholarships and government schemes,
+- explore internships and learning opportunities,
+- generate personalized learning roadmaps,
+- ask an AI Career Assistant for practical guidance,
+- receive AI responses in English, Hindi, or Telugu.
+
+---
+
+## ✨ Key Features
+
+| Feature | Description |
+|---|---|
+| 📄 Resume Analyzer | Upload a PDF, DOCX, or TXT resume and get extracted skills, education, experience, ATS score, and improvement suggestions. |
+| 💼 Career Mentor | Get career recommendations based on skills, education, and experience. |
+| 🎓 Scholarship Finder | Discover scholarships using education level, income, GPA, and eligibility details. |
+| 🏛️ Government Schemes | Find relevant government schemes with eligibility, benefits, required documents, and application steps. |
+| 🚀 Opportunities Finder | Search internships, competitions, bootcamps, and career-building opportunities. |
+| 🗺️ Learning Roadmap | Generate a structured learning plan with monthly goals, skills, and resources. |
+| 🤖 AI Career Assistant | Ask career questions and receive roadmaps, resume tips, interview questions, skill suggestions, and project ideas. |
+| 🌐 Multilingual Support | AI responses support English, Hindi, and Telugu. |
+| 🔐 BYOK Support | Users can bring their own API key/token through a secure password input. |
+| 🧠 Local AI with Ollama | Supports local inference through Ollama at `http://localhost:11434/api/generate`. |
+
+---
+
+## 🧠 AI Features
+
+The **AI Career Assistant** can generate:
+
+- career roadmap,
+- resume improvement tips,
+- interview questions,
+- skill recommendations,
+- project suggestions.
+
+### Supported AI Modes
+
+| Mode | Purpose |
+|---|---|
+| Local Ollama | Run AI locally using the default `llama3` model or any installed Ollama model. |
+| BYOK | Use your own API key/token with an OpenAI-compatible endpoint. |
+| Rule-based Fallback | Get simple offline guidance when no AI provider is configured. |
+
+### Multilingual Responses
+
+Use the sidebar language selector to choose:
+
+- English
+- Hindi
+- Telugu
+
+The AI Career Assistant responds in the selected language without breaking existing app features.
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Tools |
+|---|---|
+| Programming Language | Python |
+| Web Framework | Streamlit |
+| Data Processing | Pandas, NumPy |
+| Machine Learning | Scikit-learn |
+| Visualization | Plotly |
+| AI Integration | Ollama API, BYOK-compatible API flow |
+| Deployment | Streamlit Cloud |
+| Version Control | Git, GitHub |
+
+---
+
+## 📁 Project Structure
+
+```text
+career-bridge-ai/
+├── app.py                         # Main Streamlit application
+├── config.py                      # Application settings and paths
+├── database.py                    # SQLite database helper
+├── resume_parser.py               # Resume parsing and ATS scoring
+├── career_engine.py               # Career recommendation engine
+├── scholarship_engine.py          # Scholarship matching engine
+├── scheme_engine.py               # Government scheme recommendation engine
+├── opportunity_engine.py          # Opportunity discovery engine
+├── roadmap_engine.py              # Learning roadmap generator
+├── services/
+│   ├── ai_provider.py             # Ollama, BYOK, and fallback AI provider logic
+│   └── language.py                # Language options and multilingual fallback content
+├── data/
+│   ├── careers.csv
+│   ├── scholarships.csv
+│   ├── schemes.csv
+│   └── opportunities.csv
+├── tests/                         # Pytest tests
+├── requirements.txt               # Python dependencies
+├── .env.example                   # Safe placeholder environment variables
+├── README.md
+└── LICENSE
 ```
 
-Install and run Ollama locally, then pull the default model:
+---
+
+## ⚙️ How to Run Locally
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/afreenns2006-rgb/career-bridge-ai.git
+cd career-bridge-ai
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+Activate it:
+
+```bash
+# Windows
+venv\Scripts\activate
+
+# macOS/Linux
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure Environment Variables
+
+```bash
+copy .env.example .env
+```
+
+On macOS/Linux:
+
+```bash
+cp .env.example .env
+```
+
+Keep real tokens only in `.env` or in the app UI. Do not commit real secrets.
+
+### 5. Run the App
+
+```bash
+streamlit run app.py
+```
+
+Open the local app at:
+
+```text
+http://localhost:8501
+```
+
+---
+
+## 🧠 Local AI Setup with Ollama
+
+Career Bridge AI supports local AI inference using Ollama.
+
+### Install and Start Ollama
 
 ```bash
 ollama pull llama3
 ollama serve
 ```
 
-In the app, open AI Career Assistant, choose Local Ollama, and use the default `llama3` model or enter another installed model name. If Ollama is not running, the app shows a friendly error message instead of crashing.
+The app calls:
 
-### BYOK - Bring Your Own Key / Token
-
-Choose BYOK on the AI Career Assistant page to use your own API key or token.
-
-- The token field is a password input.
-- No real API key is hardcoded.
-- Do not commit real secrets.
-- `.env.example` contains placeholder values only.
-- The default BYOK endpoint is OpenAI-compatible: `https://api.openai.com/v1/chat/completions`.
-
-### Offline Fallback
-
-Choose Rule-based fallback if you do not want to use Ollama or an external provider. The app generates a simple offline career guidance response in the selected language.
-
-### Run the App
-
-```bash
-pip install -r requirements.txt
-streamlit run app.py
+```text
+http://localhost:11434/api/generate
 ```
 
-## ✨ Features
+In the app:
 
-### 📄 Resume Analyzer
-- Upload and analyze your resume in PDF, DOCX, or TXT format
-- Extract skills, education, and experience automatically
-- Get ATS (Applicant Tracking System) scoring
-- Receive AI-powered improvement suggestions
+1. Open **AI Career Assistant**.
+2. Select **Local Ollama**.
+3. Use the default model `llama3` or enter another installed model.
+4. Ask a career-related question.
 
-### 💼 Career Mentor
-- Get personalized career recommendations based on your profile
-- Discover career paths matching your skills and experience
-- Analyze skill gaps and learning priorities
-- Explore similar career opportunities
+If Ollama is not running, the app shows a friendly error message instead of crashing.
 
-### 🎓 Scholarship Finder
-- Discover scholarship opportunities matching your eligibility
-- Filter by education level, income, and state
-- Track application deadlines and requirements
-- Get matched with 1,500+ scholarship programs
+---
 
-### 🏛️ Government Scheme Recommender
-- Find relevant government schemes and assistance programs
-- Check eligibility for SC/ST, OBC, and other categories
-- Access application process and required documents
-- Get support information and timelines
+## 🔐 BYOK - Bring Your Own Key / Token
 
-### 🚀 Opportunity Dashboard
-- Explore internships, competitions, hackathons, and bootcamps
-- Search and filter opportunities by type and category
-- Match opportunities with your skills
-- Track deadlines and application status
+Career Bridge AI supports BYOK for users who want to connect their own AI provider.
 
-### 🗺️ Learning Roadmap Generator
-- Create personalized learning plans
-- Get monthly milestones and learning goals
-- Access recommended resources and courses
-- Track progress and adjust your path
+- Select **BYOK** in the AI Career Assistant page.
+- Enter your API key/token in the password field.
+- Enter an OpenAI-compatible endpoint if needed.
+- No API key is hardcoded in the project.
+- `.env.example` contains placeholders only.
 
-## 🚀 Quick Start
+Default BYOK endpoint:
 
-### Prerequisites
-- Python 3.9 or higher
-- pip package manager
-- Git (optional)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/CareerBridgeAI/career-bridge-ai.git
-   cd career-bridge-ai
-   ```
-
-2. **Create a virtual environment** (recommended)
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Run the application**
-   ```bash
-   streamlit run app.py
-   ```
-
-5. **Open your browser**
-   - The app will automatically open at `http://localhost:8501`
-   - If not, manually navigate to that URL
-
-## 📁 Project Structure
-
-```
-career-bridge-ai/
-├── app.py                          # Main Streamlit application
-├── config.py                       # Configuration and paths
-├── database.py                     # Database management (SQLite)
-├── resume_parser.py                # Resume analysis engine
-├── career_engine.py                # Career recommendation engine
-├── scholarship_engine.py           # Scholarship matching engine
-├── scheme_engine.py                # Government scheme engine
-├── opportunity_engine.py           # Opportunity discovery engine
-├── roadmap_engine.py              # Learning roadmap generator
-├── requirements.txt                # Python dependencies
-├── README.md                       # This file
-├── data/                          # Data directory (auto-created)
-│   └── career_bridge.db          # SQLite database
-├── uploads/                       # Resume uploads (auto-created)
-├── models/                        # ML models (auto-created)
-├── assets/                        # Static assets (auto-created)
-├── logs/                          # Application logs (auto-created)
-└── tests/                         # Test files (auto-created)
+```text
+https://api.openai.com/v1/chat/completions
 ```
 
-## 🔧 Configuration
+---
 
-The application uses `config.py` for all configuration settings:
+## ☁️ Deployment Details
 
-- **Database Path**: `data/career_bridge.db`
-- **Max Upload Size**: 10 MB
-- **Allowed Formats**: PDF, DOCX, TXT
-- **Min ATS Score**: 40/100
-- **Log Level**: INFO
+| Item | Details |
+|---|---|
+| Platform | Streamlit Cloud |
+| Live Demo | [Career Bridge AI App](https://careerbridgeai-3kkasz5pd3ad7fzfry39e3.streamlit.app) |
+| Repository | [GitHub Repo](https://github.com/afreenns2006-rgb/career-bridge-ai) |
+| Main File | `app.py` |
+| Dependency File | `requirements.txt` |
 
-## 🛠️ Architecture
+For Streamlit Cloud deployment:
 
-### Core Components
+1. Push the project to GitHub.
+2. Connect the repository to Streamlit Cloud.
+3. Set `app.py` as the entry point.
+4. Add any private secrets in Streamlit Cloud secrets, not in Git.
+5. Deploy the app.
 
-1. **Database Layer** (`database.py`)
-   - SQLite database with 7 normalized tables
-   - CRUD operations for all entities
-   - Foreign key relationships and constraints
+---
 
-2. **Resume Parser** (`resume_parser.py`)
-   - Multi-format resume extraction (PDF, DOCX, TXT)
-   - 60+ skill vocabulary matching
-   - ATS score calculation (0-100)
-   - Education and experience extraction
-
-3. **Recommendation Engines**
-   - **Career Engine**: Skill matching (60%) + Experience (40%)
-   - **Scholarship Engine**: Score-based matching with eligibility filtering
-   - **Scheme Engine**: Category-aware recommendations with bonus scoring
-   - **Opportunity Engine**: 50%+ skill match threshold filtering
-
-4. **Learning Roadmap** (`roadmap_engine.py`)
-   - Personalized learning plan generation
-   - Monthly milestone tracking
-   - Resource recommendations
-   - Progress reporting
-
-5. **Web Interface** (`app.py`)
-   - Streamlit-based UI with 7 main pages
-   - Session state management
-   - Responsive design
-   - Real-time recommendations
-
-## 📊 Database Schema
-
-### Users Table
-```sql
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE,
-    education_level TEXT,
-    experience_years INTEGER,
-    state TEXT,
-    annual_income INTEGER,
-    category TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-```
-
-### Additional Tables
-- `resumes` - Resume data and metadata
-- `career_recommendations` - Generated recommendations
-- `scholarship_recommendations` - Matched scholarships
-- `government_schemes` - Recommended schemes
-- `opportunities` - Available opportunities
-- `learning_roadmaps` - Learning plans
-
-## 🔑 Key Algorithms
+## 🔍 How It Works
 
 ### Career Recommendation Algorithm
-```
+
+```text
 Match Score = (Skill Match * 0.6) + (Experience Score * 0.4)
-- Skill Match: Matching skills / Required skills * 100
-- Experience Score: (Years / Min Required) * 80
-- Minimum threshold: 30%
 ```
 
-### Scholarship Scoring
-```
-Score = 75 + (Income Factor * 0.25) + (GPA Bonus)
-- Income Factor: (100 - (Income / Max Income * 100))
-- GPA Bonus: +10 if GPA >= 3.5
-```
+- Skill Match: matching skills divided by required skills.
+- Experience Score: user experience compared with minimum role experience.
+- Minimum recommendation threshold: 30%.
 
-### ATS Score Calculation
-```
-Score = Base Points + Skill Points + Education + Experience + Contact + Keywords
-- Content length bonuses: +10 for 500+ chars, +10 for 1000+ chars
-- Per skill: +2 (max 20)
-- Education present: +15
-- Work experience present: +15
-- Email found: +10, Phone found: +5
-- Work keywords (achieved, managed, etc.): +2 each
-- Final: min(score, 100)
-```
+### Resume ATS Score
 
-## 🎯 Usage Examples
+The resume analyzer checks:
 
-### 1. Analyze Your Resume
-1. Go to "Resume Analyzer" page
-2. Upload your resume (PDF, DOCX, or TXT)
-3. View extracted skills, education, and experience
-4. Check your ATS score
-5. Follow improvement suggestions
+- resume length,
+- detected skills,
+- education details,
+- experience details,
+- contact information,
+- action keywords.
 
-### 2. Get Career Recommendations
-1. Navigate to "Career Mentor"
-2. Enter your experience and education level
-3. Select your current skills
-4. Click "Get Career Recommendations"
-5. Review matches and skill gaps
+### Scholarship and Scheme Matching
 
-### 3. Find Scholarships
-1. Go to "Scholarship Finder"
-2. Enter your details (education, income, GPA)
-3. Click "Find Scholarships"
-4. View matching opportunities and deadlines
+The platform uses rule-based eligibility checks such as:
 
-### 4. Explore Government Schemes
-1. Visit "Government Schemes"
-2. Provide your details (state, age, income, category)
-3. Get matched schemes with eligibility status
-4. Review application process and documents needed
+- education level,
+- income,
+- GPA,
+- category,
+- state,
+- deadline and benefit information.
 
-### 5. Discover Opportunities
-1. Go to "Opportunity Dashboard"
-2. Search or filter opportunities
-3. View match scores for internships and competitions
-4. Apply directly or save for later
-
-### 6. Create Learning Roadmap
-1. Visit "Learning Roadmap Generator"
-2. Select target career and duration
-3. Set your weekly availability
-4. Generate personalized roadmap
-5. Follow monthly milestones
+---
 
 ## 🧪 Testing
 
-Run the application in development mode:
+Run tests with:
 
 ```bash
-streamlit run app.py --logger.level=debug
+pytest
 ```
 
-To check for syntax errors:
+Check Python syntax:
 
 ```bash
 python -m py_compile *.py
 ```
 
-## 📝 Default Data
+---
 
-The application comes with default data for:
-- **8 Career Paths**: Software Developer, Data Scientist, DevOps Engineer, etc.
-- **5 Scholarships**: Google, Microsoft, National Merit, SC/ST, Women In Tech
-- **5 Government Schemes**: PMKVY, NAPS, PMEGP, State programs
-- **5 Opportunities**: Internships, competitions, bootcamps
+## 🔒 Privacy and Security
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙋 Support
-
-For support, email support@careerbridgeai.com or open an issue on GitHub.
-
-## 🚀 Future Enhancements
-
-- [ ] Machine Learning skill level detection
-- [ ] Real-time job market data integration
-- [ ] AI-powered interview preparation
-- [ ] Peer matching and mentorship network
-- [ ] Mobile app (React Native)
-- [ ] Multi-language support
-- [ ] LinkedIn integration
-- [ ] Job portal API connections
-
-## 📊 Statistics
-
-- **Active Users**: 10,000+
-- **Available Opportunities**: 5,000+
-- **Scholarship Programs**: 1,500+
-- **Success Rate**: 85%+
-
-## 🔒 Privacy & Security
-
-- All resume data is stored locally in your SQLite database
-- No data is sent to external servers
-- Passwords and sensitive information are never logged
-- GDPR compliant data handling
-
-## 👨‍💻 Author
-
-Career Bridge AI Team
-
-## 📅 Version History
-
-- **v1.0.0** (2024) - Initial release with full feature set
-  - Resume analysis
-  - Career recommendations
-  - Scholarship finder
-  - Government schemes
-  - Opportunity discovery
-  - Learning roadmap generator
+- Resume files are processed locally by the app.
+- Real API keys should never be committed.
+- BYOK token input uses a password field.
+- `.env.example` contains placeholder values only.
+- Sensitive values should be stored in `.env` or deployment secrets.
 
 ---
 
-**Last Updated**: 2024  
-**Status**: Production Ready ✅
+## 🌱 Future Improvements
 
+- More Indian regional languages.
+- Real-time job market integration.
+- Advanced resume scoring with AI feedback.
+- Interview practice chatbot.
+- Personalized dashboard for saved opportunities.
+- Email or WhatsApp deadline reminders.
+- Mentor matching for students.
+- More scholarship and government scheme datasets.
+- Better analytics and visual progress tracking.
 
+---
 
-## Getting started
+## 👥 Team Members
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+| Name | Role |
+|---|---|
+| Afreen | Developer / Project Lead |
+| Team Member 2 | Contributor |
+| Team Member 3 | Contributor |
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+> Replace placeholder names with your final hackathon team details before submission.
 
-## Add your files
+---
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## 🤝 Contributing
 
-```
-cd existing_repo
-git remote add origin https://code.swecha.org/Mahin08/career-bridge-ai.git
-git branch -M main
-git push -uf origin main
-```
+Contributions are welcome.
 
-## Integrate with your tools
+1. Fork the repository.
+2. Create a new branch.
+3. Make your changes.
+4. Commit with a clear message.
+5. Open a pull request.
 
-- [ ] [Set up project integrations](https://code.swecha.org/Mahin08/career-bridge-ai/-/settings/integrations)
+---
 
-## Collaborate with your team
+## 📄 License
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
-## Test and Deploy
+---
 
-Use the built-in continuous integration in GitLab.
+## 🙌 Acknowledgement
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Career Bridge AI was built as a student-focused hackathon project to make career guidance more accessible, practical, and personalized.
 
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+**Status:** Hackathon Submission Ready ✅
