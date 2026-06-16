@@ -42,6 +42,12 @@ def test_streamlit_upload_resume_parses_without_local_file_path() -> None:
     assert {"python", "sql"}.issubset(set(parser.extract_skills()))
 
 
+def test_resume_validation_accepts_short_keyword_text() -> None:
+    assert ResumeParser.has_enough_resume_text("Python SQL internship")
+    assert ResumeParser.has_enough_resume_text("skills education project")
+    assert not ResumeParser.has_enough_resume_text("short")
+
+
 def test_career_recommendations_never_return_unknown() -> None:
     engine = CareerRecommendationEngine()
 

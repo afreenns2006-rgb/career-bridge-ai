@@ -13,12 +13,19 @@ import re
 from collections import Counter
 
 try:
-    from pypdf import PdfReader
+    from pypdf import PdfReader as PypdfReader
 except ImportError:
-    try:
-        from PyPDF2 import PdfReader
-    except ImportError:
-        PdfReader = None
+    PypdfReader = None
+
+try:
+    from PyPDF2 import PdfReader as PyPDF2Reader
+except ImportError:
+    PyPDF2Reader = None
+
+try:
+    import pdfplumber
+except ImportError:
+    pdfplumber = None
 
 try:
     from docx import Document
@@ -26,6 +33,19 @@ except ImportError:
     Document = None
 
 logger = logging.getLogger(__name__)
+
+RESUME_KEYWORDS = {
+    "skills",
+    "education",
+    "project",
+    "experience",
+    "python",
+    "java",
+    "sql",
+    "internship",
+    "college",
+    "degree",
+}
 
 # Common skills list for extraction
 COMMON_SKILLS = {
@@ -152,21 +172,66 @@ class ResumeParser:
 
     def _extract_from_pdf(self) -> str:
         """Extract text from PDF file."""
-        if not PdfReader:
-            logger.warning("PDF reader is not installed. Cannot extract PDF.")
+        if not PypdfReader and not PyPDF2Reader and not pdfplumber:
+            logger.warning("No PDF reader is installed. Cannot extract PDF.")
             return ""
 
+        attempted_readers = set()
+        for reader_name, reader_cls in (("pypdf", PypdfReader), ("PyPDF2", PyPDF2Reader)):
+            if reader_cls is None or reader_cls in attempted_readers:
+                continue
+            attempted_readers.add(reader_cls)
+            text = self._extract_pdf_with_reader(reader_cls, reader_name)
+            if text.strip():
+                if reader_name != "pypdf":
+                    self.metadata["used_fallback_parser"] = True
+                return text
+
+        text = self._extract_pdf_with_pdfplumber()
+        if text.strip():
+            self.metadata["used_fallback_parser"] = True
+            return text
+
+        return ""
+
+    def _get_binary_stream(self) -> BytesIO:
+        """Return upload bytes as a fresh in-memory stream."""
+        if self.file_bytes is not None:
+            return BytesIO(self.file_bytes)
+        with open(self.file_path, "rb") as file:
+            return BytesIO(file.read())
+
+    def _extract_pdf_with_reader(self, reader_cls: Any, reader_name: str) -> str:
+        """Extract PDF text with pypdf/PyPDF2 from an in-memory stream."""
         text_parts = []
         try:
-            file_obj = BytesIO(self.file_bytes) if self.file_bytes is not None else open(self.file_path, "rb")
-            with file_obj as file:
-                reader = PdfReader(file)
+            with self._get_binary_stream() as file:
+                reader = reader_cls(file)
                 for page in reader.pages:
                     page_text = page.extract_text() or ""
                     if page_text.strip():
                         text_parts.append(page_text)
         except Exception as e:
-            logger.error(f"Error reading PDF: {e}")
+            logger.warning("%s PDF extraction failed: %s", reader_name, e)
+
+        return "\n".join(text_parts).strip()
+
+    def _extract_pdf_with_pdfplumber(self) -> str:
+        """Extract PDF text with pdfplumber as a deployment-compatible fallback."""
+        if not pdfplumber:
+            logger.warning("pdfplumber is not installed. Skipping PDF fallback parser.")
+            return ""
+
+        text_parts = []
+        try:
+            with self._get_binary_stream() as file:
+                with pdfplumber.open(file) as pdf:
+                    for page in pdf.pages:
+                        page_text = page.extract_text() or ""
+                        if page_text.strip():
+                            text_parts.append(page_text)
+        except Exception as e:
+            logger.warning("pdfplumber PDF extraction failed: %s", e)
 
         return "\n".join(text_parts).strip()
 
@@ -390,6 +455,13 @@ class ResumeParser:
         # Try to extract text
         try:
             text = self.extract_text()
-            return bool(text and text.strip())
+            return self.has_enough_resume_text(text)
         except Exception:
             return False
+
+    @staticmethod
+    def has_enough_resume_text(text: str) -> bool:
+        """Validate extracted text without rejecting deployment PDFs too aggressively."""
+        text = text or ""
+        text_lower = text.lower()
+        return len(text.strip()) >= 30 or any(keyword in text_lower for keyword in RESUME_KEYWORDS)

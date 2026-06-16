@@ -1,4 +1,5 @@
 streamlit
+PyPDF2
 pandas
 numpy
 scikit-learn
@@ -7,4 +8,5 @@ requests
 python-dotenv
 Pillow
 pypdf
+pdfplumber
 python-docx

@@ -1091,14 +1091,16 @@ def render_resume_analyzer() -> None:
 
     try:
         parser = ResumeParser.from_upload(uploaded_file)
-        if not parser.validate_resume():
-            st.error(t("resume_extract_error"))
-            return
 
         with st.spinner(t("resume_spinner")):
             text = parser.extract_text()
-            if not text.strip():
-                st.error(t("resume_extract_error"))
+            if parser.metadata.get("used_fallback_parser"):
+                st.warning("Using fallback resume parser for deployment compatibility.")
+            if not parser.has_enough_resume_text(text):
+                if uploaded_file.name.lower().endswith(".pdf"):
+                    st.warning("Could not extract enough text from this PDF. Please try TXT/DOCX resume.")
+                else:
+                    st.warning(t("resume_extract_error"))
                 return
             skills = parser.extract_skills()
             education = parser.extract_education()
