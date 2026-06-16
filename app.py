@@ -16,11 +16,11 @@ from dotenv import load_dotenv
 from config import STREAMLIT_PAGE_TITLE, STREAMLIT_PAGE_ICON, STREAMLIT_LAYOUT, ensure_directories
 from database import get_db_manager
 from career_engine import CareerRecommendationEngine
-from opportunity_engine import OpportunityEngine
+from opportunity_engine import OpportunityEngine, DEFAULT_OPPORTUNITIES
 from resume_parser import ResumeParser
 from roadmap_engine import RoadmapGenerator
-from scholarship_engine import ScholarshipRecommendationEngine
-from scheme_engine import GovernmentSchemeEngine
+from scholarship_engine import ScholarshipRecommendationEngine, DEFAULT_SCHOLARSHIPS
+from scheme_engine import GovernmentSchemeEngine, DEFAULT_SCHEMES
 from services.ai_provider import (
     DEFAULT_BYOK_ENDPOINT,
     DEFAULT_BYOK_MODEL,
@@ -102,7 +102,7 @@ def initialize_session_state() -> None:
 
     if "language" not in st.session_state:
         st.session_state.language = normalize_language(
-            st.session_state.get("selected_language") or os.getenv("DEFAULT_LANGUAGE", "English")
+            st.session_state.get("selected_language") or get_runtime_setting("DEFAULT_LANGUAGE", "English")
         )
     else:
         st.session_state.language = normalize_language(st.session_state.language)
@@ -171,7 +171,7 @@ def render_language_selector() -> None:
                 )
                 return
 
-        default_language = normalize_language(os.getenv("DEFAULT_LANGUAGE", "English"))
+        default_language = normalize_language(get_runtime_setting("DEFAULT_LANGUAGE", "English"))
         st.sidebar.selectbox(
             "🌐 Response Language",
             options=language_options,
@@ -285,15 +285,8 @@ def render_resume_analyzer() -> None:
     uploaded_file = st.file_uploader("Upload your resume (PDF, DOCX, TXT)", type=["pdf", "docx", "txt"])
 
     if uploaded_file is not None:
-        # Save uploaded file
-        file_path = Path("uploads") / uploaded_file.name
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with open(file_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-
-        # Parse resume
-        parser = ResumeParser(file_path)
+        # Parse directly from the Streamlit upload; this works on Streamlit Cloud.
+        parser = ResumeParser.from_upload(uploaded_file)
 
         if not parser.validate_resume():
             st.error("Could not extract text from the resume. Please upload a readable PDF/DOCX.")
@@ -508,11 +501,16 @@ def render_scholarship_finder() -> None:
     st.markdown("---")
 
     if st.button("Find Scholarships", key="find_scholarships"):
-        with st.spinner("Searching for scholarships..."):
-            scholarship_engine = ScholarshipRecommendationEngine()
-            recommendations = scholarship_engine.recommend_scholarships(
-                education_level=education_level, state=state, annual_income=annual_income, gpa=gpa
-            )
+        try:
+            with st.spinner("Searching for scholarships..."):
+                scholarship_engine = ScholarshipRecommendationEngine()
+                recommendations = scholarship_engine.recommend_scholarships(
+                    education_level=education_level, state=state, annual_income=annual_income, gpa=gpa
+                )
+        except Exception as exc:
+            logger.exception("Scholarship finder failed, using fallback dataset: %s", exc)
+            st.warning("Scholarship service unavailable. Showing fallback results.")
+            recommendations = fallback_scholarships(education_level, annual_income)
 
         st.session_state.scholarship_recommendations = recommendations
 
@@ -581,11 +579,16 @@ def render_scheme_recommender() -> None:
     st.markdown("---")
 
     if st.button("Get Scheme Recommendations", key="get_schemes"):
-        with st.spinner("Finding government schemes..."):
-            scheme_engine = GovernmentSchemeEngine()
-            recommendations = scheme_engine.recommend_schemes(
-                state=state, education_level=education_level, annual_income=annual_income, age=age, category=category
-            )
+        try:
+            with st.spinner("Finding government schemes..."):
+                scheme_engine = GovernmentSchemeEngine()
+                recommendations = scheme_engine.recommend_schemes(
+                    state=state, education_level=education_level, annual_income=annual_income, age=age, category=category
+                )
+        except Exception as exc:
+            logger.exception("Government schemes failed, using fallback dataset: %s", exc)
+            st.warning("Government scheme service unavailable. Showing fallback results.")
+            recommendations = fallback_schemes(annual_income, age)
 
         st.session_state.scheme_recommendations = recommendations
 
@@ -664,26 +667,29 @@ def render_opportunity_dashboard() -> None:
 
     st.markdown("---")
 
-    # Search opportunities
-    opportunity_engine = OpportunityEngine()
+    try:
+        opportunity_engine = OpportunityEngine()
 
-    filters = {}
-    if opportunity_type != "All":
-        filters["type"] = opportunity_type
-    if category != "All":
-        filters["category"] = category
+        filters = {}
+        if opportunity_type != "All":
+            filters["type"] = opportunity_type
+        if category != "All":
+            filters["category"] = category
 
-    if search_query:
-        opportunities = opportunity_engine.search_opportunities(search_query, filters)
-    else:
-        # Get recommended opportunities
-        skills = st.session_state.resume_data.get("skills", []) if st.session_state.resume_data else []
-        education = st.session_state.user_profile.get("education_level", "UG")
-        experience = st.session_state.user_profile.get("experience_years", 0)
+        if search_query:
+            opportunities = opportunity_engine.search_opportunities(search_query, filters)
+        else:
+            skills = st.session_state.resume_data.get("skills", []) if st.session_state.resume_data else []
+            education = st.session_state.user_profile.get("education_level", "UG")
+            experience = st.session_state.user_profile.get("experience_years", 0)
 
-        opportunities = opportunity_engine.recommend_opportunities(
-            user_skills=skills, education_level=education, experience_years=experience, preferences=filters
-        )
+            opportunities = opportunity_engine.recommend_opportunities(
+                user_skills=skills, education_level=education, experience_years=experience, preferences=filters
+            )
+    except Exception as exc:
+        logger.exception("Opportunities failed, using fallback dataset: %s", exc)
+        st.warning("Opportunity service unavailable. Showing fallback results.")
+        opportunities = fallback_opportunities()
 
     # Display opportunities
     if opportunities:
@@ -758,19 +764,20 @@ def render_roadmap_generator() -> None:
     st.markdown("---")
 
     if st.button("Generate Learning Roadmap", key="generate_roadmap"):
-        with st.spinner("Creating your personalized roadmap..."):
-            roadmap_engine = RoadmapGenerator()
-
-            # Get current skills
-            current_skills = st.session_state.resume_data.get("skills", []) if st.session_state.resume_data else []
-
-            # Generate plan
-            learning_plan = roadmap_engine.generate_learning_plan(
-                current_skills=current_skills,
-                target_career=target_career,
-                available_hours_per_week=available_hours,
-                duration_months=duration_months,
-            )
+        current_skills = st.session_state.resume_data.get("skills", []) if st.session_state.resume_data else []
+        try:
+            with st.spinner("Creating your personalized roadmap..."):
+                roadmap_engine = RoadmapGenerator()
+                learning_plan = roadmap_engine.generate_learning_plan(
+                    current_skills=current_skills,
+                    target_career=target_career,
+                    available_hours_per_week=available_hours,
+                    duration_months=duration_months,
+                )
+        except Exception as exc:
+            logger.exception("Roadmap generation failed, using fallback roadmap: %s", exc)
+            st.warning("Learning roadmap service unavailable. Showing fallback results.")
+            learning_plan = fallback_learning_plan(current_skills, target_career, available_hours, duration_months)
 
         st.session_state.learning_plan = learning_plan
 
@@ -875,14 +882,14 @@ def render_ai_career_assistant() -> None:
     with st.expander(t("ai_provider_settings"), expanded=True):
         provider = st.radio(
             "Provider",
-            ["Local Ollama", "BYOK", "Rule-based fallback"],
+            ["Auto", "BYOK", "Local Ollama", "Rule-based fallback"],
             horizontal=True,
-            help="Use local Ollama, your own API key/token, or an offline fallback response.",
+            help="Auto tries cloud API first, then local Ollama, then offline fallback.",
         )
 
         col1, col2 = st.columns(2)
         with col1:
-            if provider == "BYOK":
+            if provider in {"BYOK", "Auto"}:
                 model_name = st.text_input(
                     "Model name",
                     value=get_runtime_setting("BYOK_MODEL", DEFAULT_BYOK_MODEL),
@@ -896,12 +903,19 @@ def render_ai_career_assistant() -> None:
                 )
 
         with col2:
-            if provider == "BYOK":
+            if provider in {"BYOK", "Auto"}:
                 byok_endpoint = st.text_input(
                     "BYOK API endpoint",
                     value=get_runtime_setting("BYOK_API_URL", DEFAULT_BYOK_ENDPOINT),
                     help="OpenAI-compatible chat completions endpoint.",
                 )
+                if provider == "Auto":
+                    st.text_input(
+                        "Ollama API URL",
+                        value=get_runtime_setting("OLLAMA_API_URL", OLLAMA_GENERATE_URL),
+                        key="ollama_url_input",
+                        help="Optional local fallback endpoint. Streamlit Cloud usually cannot reach localhost.",
+                    )
             else:
                 byok_endpoint = DEFAULT_BYOK_ENDPOINT
                 st.text_input(
@@ -911,14 +925,14 @@ def render_ai_career_assistant() -> None:
                     help="Local Ollama generate endpoint.",
                 )
 
-        if provider == "BYOK":
+        if provider in {"BYOK", "Auto"}:
             api_token = st.text_input(
                 "API key/token",
                 value=get_runtime_setting("BYOK_API_KEY", ""),
                 type="password",
                 help="Your token is used only for this Streamlit session and is not saved in the repository.",
             )
-            ollama_url = OLLAMA_GENERATE_URL
+            ollama_url = st.session_state.get("ollama_url_input", OLLAMA_GENERATE_URL)
         else:
             api_token = ""
             ollama_url = st.session_state.get("ollama_url_input", OLLAMA_GENERATE_URL)
@@ -1007,6 +1021,7 @@ def render_sidebar() -> str:
         "Opportunities",
         "Learning Roadmap",
         "AI Career Assistant",
+        "Deployment Diagnostics",
     ]
     page_translation_keys = {
         "Home": "home",
@@ -1017,6 +1032,7 @@ def render_sidebar() -> str:
         "Opportunities": "opportunities",
         "Learning Roadmap": "learning_roadmap",
         "AI Career Assistant": "ai_career_assistant",
+        "Deployment Diagnostics": "deployment_diagnostics",
     }
 
     page = st.sidebar.radio(
@@ -1077,6 +1093,145 @@ def render_home_page() -> None:
     for index, feature_key in enumerate(feature_keys):
         with cols[index % 2]:
             st.write(f"- **{t(feature_key)}**")
+
+
+def render_deployment_diagnostics() -> None:
+    """Show deployment health without requiring local-only services."""
+    st.header(t("deployment_diagnostics"))
+    st.write("Deployment-safe status checks for demo readiness.")
+
+    checks = []
+    byok_token = bool(get_runtime_setting("BYOK_API_KEY", ""))
+    byok_url = get_runtime_setting("BYOK_API_URL", DEFAULT_BYOK_ENDPOINT)
+    ollama_url = get_runtime_setting("OLLAMA_API_URL", OLLAMA_GENERATE_URL)
+
+    checks.append(("Cloud AI API key", "Configured" if byok_token else "Missing - fallback will be used"))
+    checks.append(("Cloud AI endpoint", byok_url or "Not configured"))
+    checks.append(("Ollama endpoint", ollama_url if "localhost" not in ollama_url else "Local only - skipped in cloud unless available"))
+
+    try:
+        db = get_db_manager()
+        checks.append(("Database", "Available" if getattr(db, "available", False) else "Unavailable - app will use session fallbacks"))
+    except Exception as exc:
+        logger.warning("Diagnostics database check failed: %s", exc)
+        checks.append(("Database", "Unavailable - app will use session fallbacks"))
+
+    parser_packages = []
+    for package_name in ["pypdf", "PyPDF2", "pdfplumber", "docx"]:
+        try:
+            __import__(package_name)
+            parser_packages.append(f"{package_name}: ok")
+        except Exception:
+            parser_packages.append(f"{package_name}: missing")
+    checks.append(("File upload parsers", ", ".join(parser_packages)))
+
+    for label, status in checks:
+        if "Missing" in status or "Unavailable" in status or "missing" in status:
+            st.warning(f"**{label}:** {status}")
+        else:
+            st.success(f"**{label}:** {status}")
+
+    st.info("If a cloud service is missing, Career Bridge AI will continue with local datasets and rule-based fallback logic.")
+
+
+def fallback_scholarships(education_level: str, annual_income: float) -> list[dict[str, object]]:
+    """Return sample scholarships when the deployed data layer is unavailable."""
+    results = []
+    for row in DEFAULT_SCHOLARSHIPS:
+        education_match = education_level.lower() in str(row.get("education", "")).lower()
+        income_match = annual_income <= float(row.get("max_income", 0))
+        if education_match and income_match:
+            results.append(
+                {
+                    "scholarship_name": row["name"],
+                    "award_amount": row["award"],
+                    "eligibility": "Eligible",
+                    "deadline": row["deadline"],
+                    "match_score": 80,
+                }
+            )
+    return results or [
+        {
+            "scholarship_name": DEFAULT_SCHOLARSHIPS[0]["name"],
+            "award_amount": DEFAULT_SCHOLARSHIPS[0]["award"],
+            "eligibility": "Review eligibility",
+            "deadline": DEFAULT_SCHOLARSHIPS[0]["deadline"],
+            "match_score": 60,
+        }
+    ]
+
+
+def fallback_schemes(annual_income: float, age: int) -> list[dict[str, object]]:
+    """Return sample government schemes when the deployed data layer is unavailable."""
+    results = []
+    for row in DEFAULT_SCHEMES:
+        if annual_income <= float(row.get("max_income", 0)) and age <= int(row.get("age_limit", 100)):
+            results.append(
+                {
+                    "scheme_name": row["name"],
+                    "scheme_type": row["type"],
+                    "benefit": row["benefit"],
+                    "eligibility": "Eligible",
+                    "deadline": row["deadline"],
+                    "max_income": row["max_income"],
+                    "age_limit": row["age_limit"],
+                }
+            )
+    return results or [
+        {
+            "scheme_name": DEFAULT_SCHEMES[0]["name"],
+            "scheme_type": DEFAULT_SCHEMES[0]["type"],
+            "benefit": DEFAULT_SCHEMES[0]["benefit"],
+            "eligibility": "Review eligibility",
+            "deadline": DEFAULT_SCHEMES[0]["deadline"],
+            "max_income": DEFAULT_SCHEMES[0]["max_income"],
+            "age_limit": DEFAULT_SCHEMES[0]["age_limit"],
+        }
+    ]
+
+
+def fallback_opportunities() -> list[dict[str, object]]:
+    """Return sample opportunities when deployed data/search is unavailable."""
+    return [
+        {
+            "opportunity_name": row["name"],
+            "opportunity_type": row["type"],
+            "category": row["category"],
+            "required_skills": [skill.strip() for skill in row.get("skills", "").split(",")],
+            "deadline": row["deadline"],
+            "stipend_or_prize": row.get("stipend") or row.get("prize"),
+            "match_score": 65,
+        }
+        for row in DEFAULT_OPPORTUNITIES
+    ]
+
+
+def fallback_learning_plan(
+    current_skills: list[str],
+    target_career: str,
+    available_hours: int,
+    duration_months: int,
+) -> dict[str, object]:
+    """Return a simple roadmap when roadmap generation is unavailable."""
+    target_skills = ["python", "sql", "git", "projects"]
+    current_lower = [skill.lower() for skill in current_skills]
+    missing_skills = [skill for skill in target_skills if skill not in current_lower]
+    return {
+        "target_career": target_career,
+        "current_skills": current_skills,
+        "target_skills": target_skills,
+        "missing_skills": missing_skills,
+        "duration_months": duration_months,
+        "available_hours_per_week": available_hours,
+        "monthly_goals": [
+            {
+                "month": month,
+                "skills_to_develop": missing_skills[:2] or target_skills[:2],
+                "estimated_hours": available_hours * 4,
+            }
+            for month in range(1, duration_months + 1)
+        ],
+    }
 
 
 def render_resume_analyzer() -> None:
@@ -1399,6 +1554,8 @@ def main() -> None:
             render_roadmap_generator()
         elif page == "AI Career Assistant":
             render_ai_career_assistant()
+        elif page == "Deployment Diagnostics":
+            render_deployment_diagnostics()
         else:
             render_home_page()
     except Exception as exc:

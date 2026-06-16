@@ -12,7 +12,7 @@ DEFAULT_OLLAMA_MODEL = "llama3"
 DEFAULT_BYOK_ENDPOINT = "https://api.openai.com/v1/chat/completions"
 DEFAULT_BYOK_MODEL = "gpt-4o-mini"
 AI_REQUEST_TIMEOUT_SECONDS = 20
-AI_FALLBACK_NOTICE = "AI service unavailable. Showing fallback recommendation."
+AI_FALLBACK_NOTICE = "AI service unavailable. Showing fallback results."
 
 
 @dataclass
@@ -63,6 +63,18 @@ def generate_ai_response(question: str, config: AIProviderConfig, profile: dict[
         return "Please enter a career-related question first."
 
     prompt = build_career_assistant_prompt(question, config.language, profile)
+
+    if config.provider == "Auto":
+        if config.api_token:
+            byok_response = _generate_with_byok(prompt, question, config)
+            if not _is_fallback_response(byok_response):
+                return byok_response
+
+        ollama_response = _generate_with_ollama(prompt, question, config)
+        if not _is_fallback_response(ollama_response):
+            return ollama_response
+
+        return _fallback_with_reason("No cloud AI API or local Ollama service is currently available.", question, config.language)
 
     if config.provider == "Local Ollama":
         return _generate_with_ollama(prompt, question, config)

@@ -35,3 +35,14 @@ def test_rule_based_fallback_returns_selected_language_content() -> None:
     )
 
     assert "కెరీర్" in response
+
+
+def test_auto_ai_provider_falls_back_without_cloud_or_ollama() -> None:
+    response = generate_ai_response(
+        "Suggest a roadmap",
+        AIProviderConfig(provider="Auto", language="English", api_token="", ollama_url="http://127.0.0.1:9/api/generate"),
+        {},
+    )
+
+    assert "AI service unavailable. Showing fallback results." in response
+    assert "Career Roadmap" in response

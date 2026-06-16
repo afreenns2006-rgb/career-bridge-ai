@@ -28,6 +28,7 @@ UI_TRANSLATIONS = {
         "opportunities": "Opportunities",
         "learning_roadmap": "Learning Roadmap",
         "ai_career_assistant": "AI Career Assistant",
+        "deployment_diagnostics": "Deployment Diagnostics",
         "quick_links": "Quick Links",
         "language": "Response Language",
         "resume_header": "Resume Analyzer",
@@ -182,6 +183,7 @@ UI_TRANSLATIONS["Hindi"] = {
     "opportunities": "अवसर",
     "learning_roadmap": "लर्निंग रोडमैप",
     "ai_career_assistant": "AI करियर असिस्टेंट",
+    "deployment_diagnostics": "डिप्लॉयमेंट डायग्नोस्टिक्स",
     "quick_links": "त्वरित लिंक",
     "language": "प्रतिक्रिया भाषा",
     "app_tagline": "आपका व्यक्तिगत करियर मार्गदर्शन प्लेटफॉर्म",
@@ -298,6 +300,7 @@ UI_TRANSLATIONS["Telugu"].update(
         "home_subtitle": "విద్యార్థులు, ఫ్రెష్ గ్రాడ్యుయేట్లు, ఉద్యోగార్ధుల కోసం AI-powered కెరీర్ మార్గదర్శనం.",
         "home_intro": "రెజ్యూమే విశ్లేషణ, కెరీర్ పాత్‌లు, అవకాశాలు లేదా AI Career Assistant కోసం sidebar నుండి టూల్ ఎంచుకోండి.",
         "main_features": "ప్రధాన ఫీచర్లు",
+        "deployment_diagnostics": "డిప్లాయ్‌మెంట్ డయాగ్నోస్టిక్స్",
     }
 )
 
