@@ -98,7 +98,7 @@ class CareerRecommendationEngine:
         user_skills_lower = [s.lower() for s in user_skills]
         
         for _, career_row in self.careers_df.iterrows():
-            career_name = career_row.get("career", "Unknown")
+            career_name = career_row.get("career", "Unnamed Career")
             required_skills_str = career_row.get("required_skills", "")
             required_skills = [s.strip() for s in required_skills_str.split(",")]
             min_experience = int(career_row.get("min_experience", 0))
@@ -122,7 +122,7 @@ class CareerRecommendationEngine:
                     "matching_skills": [s for s in required_skills if s.lower() in user_skills_lower],
                     "missing_skills": [s for s in required_skills if s.lower() not in user_skills_lower],
                     "salary_range": career_row.get("salary_range", "Not specified"),
-                    "growth_potential": career_row.get("growth", "Unknown")
+                    "growth_potential": career_row.get("growth", "Not specified")
                 })
         
         return self.rank_recommendations(recommendations)
@@ -186,11 +186,11 @@ class CareerRecommendationEngine:
         required_skills = [s.strip() for s in str(row.get("required_skills", "")).split(",")]
         
         return {
-            "career_name": row.get("career", ""),
+            "career_name": row.get("career", "Unnamed Career"),
             "required_skills": required_skills,
             "min_experience": int(row.get("min_experience", 0)),
             "salary_range": row.get("salary_range", "Not specified"),
-            "growth_potential": row.get("growth", "Unknown")
+            "growth_potential": row.get("growth", "Not specified")
         }
     
     def get_similar_careers(

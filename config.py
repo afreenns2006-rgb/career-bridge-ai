@@ -60,7 +60,8 @@ AI_PROVIDER: Final[str] = os.getenv("AI_PROVIDER", "ollama")
 
 # Ollama configuration
 OLLAMA_API_URL: Final[str] = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")
-OLLAMA_MODEL: Final[str] = os.getenv("OLLAMA_MODEL", "llama3")
+OLLAMA_MODEL: Final[str] = os.getenv("OLLAMA_MODEL", "llama3.2")
+OLLAMA_HEALTH_URL: Final[str] = os.getenv("OLLAMA_HEALTH_URL", "http://localhost:11434")
 
 # BYOK Configuration
 BYOK_API_KEY: Final[str] = os.getenv("BYOK_API_KEY", "")

@@ -27,16 +27,18 @@ class OllamaProvider:
     """
     
     OLLAMA_API_URL = "http://localhost:11434/api/generate"
-    DEFAULT_MODEL = "llama3"
+    OLLAMA_HEALTH_URL = "http://localhost:11434"
+    DEFAULT_MODEL = "llama3.2"
     
     def __init__(self, model: str = DEFAULT_MODEL):
         """
         Initialize Ollama provider.
         
         Args:
-            model: Ollama model name (default: llama3)
+            model: Ollama model name (default: llama3.2)
         """
         self.model = model
+        self.base_url = self.OLLAMA_HEALTH_URL
         self.api_url = self.OLLAMA_API_URL
     
     def check_connection(self) -> bool:
@@ -48,7 +50,7 @@ class OllamaProvider:
         """
         try:
             response = requests.get(
-                "http://localhost:11434/api/tags",
+                self.base_url,
                 timeout=5
             )
             return response.status_code == 200
@@ -90,9 +92,18 @@ class OllamaProvider:
             
             if response.status_code == 200:
                 result = response.json()
-                return result.get("response", "").strip()
+                response_text = ""
+                if isinstance(result, dict):
+                    response_text = result.get("response") or result.get("result") or ""
+                    if not response_text:
+                        choices = result.get("choices")
+                        if isinstance(choices, list) and choices:
+                            first_choice = choices[0]
+                            if isinstance(first_choice, dict):
+                                response_text = first_choice.get("content") or first_choice.get("message", {}).get("content", "")
+                return (response_text or "").strip()
             else:
-                logger.error(f"Ollama error: {response.status_code}")
+                logger.error(f"Ollama error: {response.status_code} - {response.text}")
                 return None
                 
         except requests.exceptions.RequestException as e:
