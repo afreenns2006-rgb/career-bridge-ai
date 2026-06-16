@@ -6,6 +6,7 @@ table creation, and CRUD operations.
 """
 
 import sqlite3
+import os
 from pathlib import Path
 from typing import Any, Optional, List
 import logging
@@ -32,9 +33,22 @@ class DatabaseManager:
 
         TODO: Implement database initialization.
         """
-        self.db_path = db_path
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.create_tables()
+        database_url = os.getenv("DATABASE_URL", "").strip()
+        if database_url.startswith("sqlite:///"):
+            self.db_path = Path(database_url.replace("sqlite:///", "", 1))
+        elif database_url:
+            logger.warning("DATABASE_URL is set but this lightweight deployment build supports SQLite only. Using local SQLite fallback.")
+            self.db_path = db_path
+        else:
+            self.db_path = db_path
+
+        self.available = False
+        try:
+            self.db_path.parent.mkdir(parents=True, exist_ok=True)
+            self.create_tables()
+            self.available = True
+        except Exception as exc:
+            logger.error("Database initialization failed; continuing without persistent storage: %s", exc)
 
     def get_connection(self) -> sqlite3.Connection:
         """
@@ -199,6 +213,10 @@ class DatabaseManager:
 
         TODO: Implement query execution with error handling.
         """
+        if not self.available:
+            logger.warning("Database unavailable. Query skipped.")
+            return [] if fetch else None
+
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
@@ -234,6 +252,10 @@ class DatabaseManager:
         placeholders = ", ".join(["?" for _ in data])
         query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
 
+        if not self.available:
+            logger.warning("Database unavailable. Insert skipped for table %s.", table)
+            return -1
+
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
@@ -265,6 +287,10 @@ class DatabaseManager:
         set_clause = ", ".join([f"{k} = ?" for k in data.keys()])
         query = f"UPDATE {table} SET {set_clause} WHERE {condition}"
 
+        if not self.available:
+            logger.warning("Database unavailable. Update skipped for table %s.", table)
+            return 0
+
         conn = self.get_connection()
         try:
             cursor = conn.cursor()
@@ -292,6 +318,10 @@ class DatabaseManager:
         TODO: Implement delete operation.
         """
         query = f"DELETE FROM {table} WHERE {condition}"
+
+        if not self.available:
+            logger.warning("Database unavailable. Delete skipped for table %s.", table)
+            return 0
 
         conn = self.get_connection()
         try:
@@ -342,5 +372,11 @@ def get_db_manager() -> DatabaseManager:
     """
     global _db_manager
     if _db_manager is None:
-        _db_manager = DatabaseManager()
+        try:
+            _db_manager = DatabaseManager()
+        except Exception as exc:
+            logger.error("Could not create database manager; using non-persistent fallback: %s", exc)
+            _db_manager = DatabaseManager.__new__(DatabaseManager)
+            _db_manager.db_path = DB_PATH
+            _db_manager.available = False
     return _db_manager

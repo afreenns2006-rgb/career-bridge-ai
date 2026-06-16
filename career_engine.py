@@ -22,14 +22,19 @@ CAREER_FALLBACKS = {
         "learning_roadmap": ["Learn SQL basics", "Practice Pandas", "Build dashboards", "Create a data portfolio"],
     },
     "machine": {
-        "career_name": "Machine Learning Engineer",
-        "required_skills": ["Python", "Machine Learning", "Statistics", "TensorFlow", "Model Deployment"],
-        "learning_roadmap": ["Revise Python", "Study ML algorithms", "Build ML projects", "Deploy one model"],
+        "career_name": "AI/ML Beginner",
+        "required_skills": ["Python", "Machine Learning", "Statistics", "Data Analysis", "Model Evaluation"],
+        "learning_roadmap": ["Revise Python", "Study ML basics", "Build beginner ML projects", "Deploy one simple model"],
     },
     "web": {
-        "career_name": "Full Stack Developer",
-        "required_skills": ["HTML", "CSS", "JavaScript", "React", "Python", "APIs"],
-        "learning_roadmap": ["Build UI basics", "Learn React", "Create APIs", "Deploy a full stack project"],
+        "career_name": "Web Developer",
+        "required_skills": ["HTML", "CSS", "JavaScript", "React", "APIs"],
+        "learning_roadmap": ["Build HTML/CSS layouts", "Learn JavaScript", "Create React projects", "Deploy a portfolio website"],
+    },
+    "programming": {
+        "career_name": "Software Developer",
+        "required_skills": ["Programming", "Java", "C", "Python", "Git", "Data Structures"],
+        "learning_roadmap": ["Strengthen programming basics", "Practice DSA", "Build projects", "Publish code on GitHub"],
     },
     "cloud": {
         "career_name": "Cloud Engineer",
@@ -124,7 +129,11 @@ class CareerRecommendationEngine:
         TODO: Implement engine initialization and load models.
         """
         self.careers_df: Optional[pd.DataFrame] = None
-        self.db_manager = get_db_manager()
+        try:
+            self.db_manager = get_db_manager()
+        except Exception as exc:
+            logger.warning("Database unavailable for career engine; continuing with in-memory data: %s", exc)
+            self.db_manager = None
         self.load_careers()
 
     def load_careers(self) -> pd.DataFrame:
@@ -287,20 +296,32 @@ class CareerRecommendationEngine:
     ) -> list[dict[str, Any]]:
         """Generate meaningful career suggestions when data or model matching fails."""
         preferences = preferences or {}
-        search_text = " ".join(user_skills + [education, str(preferences.get("domain", ""))]).lower()
+        search_text = " ".join(
+            user_skills
+            + [
+                education,
+                str(preferences.get("domain", "")),
+                str(preferences.get("interests", "")),
+                str(preferences.get("goals", "")),
+            ]
+        ).lower()
+
+        search_tokens = {token.strip(" /,.;:()[]{}") for token in search_text.split()}
 
         if any(word in search_text for word in ["data", "sql", "excel", "analytics", "pandas"]):
             fallback = CAREER_FALLBACKS["data"]
-        elif any(word in search_text for word in ["machine", "ml", "ai", "tensorflow", "pytorch"]):
-            fallback = CAREER_FALLBACKS["machine"]
         elif any(word in search_text for word in ["web", "react", "html", "css", "javascript"]):
             fallback = CAREER_FALLBACKS["web"]
+        elif any(word in search_text for word in ["java", "programming", "software", "developer", "coding"]) or "c" in search_tokens:
+            fallback = CAREER_FALLBACKS["programming"]
+        elif any(word in search_text for word in ["machine", "ml", "ai", "tensorflow", "pytorch", "tech", "technology"]):
+            fallback = CAREER_FALLBACKS["machine"]
         elif any(word in search_text for word in ["cloud", "aws", "azure", "docker"]):
             fallback = CAREER_FALLBACKS["cloud"]
         elif any(word in search_text for word in ["security", "cyber", "network"]):
             fallback = CAREER_FALLBACKS["security"]
         else:
-            fallback = CAREER_FALLBACKS["default"]
+            fallback = CAREER_FALLBACKS["machine"]
 
         user_skills_lower = [skill.lower() for skill in user_skills]
         required_skills = fallback["required_skills"]

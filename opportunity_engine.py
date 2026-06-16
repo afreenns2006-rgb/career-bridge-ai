@@ -278,20 +278,29 @@ class OpportunityEngine:
         if self.opportunities_df is None:
             self.load_opportunities()
 
-        opp = self.opportunities_df[self.opportunities_df["name"].str.lower() == opportunity_id.lower()]
+        name_column = self._resolve_column("name", "opportunity_name", "title", "event_name", "position")
+        if not name_column:
+            logger.warning("Opportunity details unavailable. Columns: %s", list(self.opportunities_df.columns))
+            return {}
+
+        opp = self.opportunities_df[self.opportunities_df[name_column].astype(str).str.lower() == opportunity_id.lower()]
         if opp.empty:
             return {}
 
         row = opp.iloc[0]
+        type_column = self._resolve_column("type", "opportunity_type", "category")
+        category_column = self._resolve_column("category", "domain", "field")
+        skills_column = self._resolve_column("skills", "required_skills", "skills_required")
+        deadline_column = self._resolve_column("deadline", "application_deadline", "registration_deadline")
         return {
-            "name": row.get("name", ""),
-            "type": row.get("type", ""),
-            "category": row.get("category", ""),
-            "skills": row.get("skills", ""),
+            "name": row.get(name_column, ""),
+            "type": row.get(type_column, "") if type_column else "",
+            "category": row.get(category_column, "") if category_column else "",
+            "skills": row.get(skills_column, "") if skills_column else "",
             "stipend": row.get("stipend", 0),
             "prize": row.get("prize", 0),
-            "deadline": row.get("deadline", ""),
-            "description": f"{row.get('type', '')} opportunity in {row.get('category', '')} field",
+            "deadline": row.get(deadline_column, "") if deadline_column else "",
+            "description": f"{row.get(type_column, '') if type_column else 'Opportunity'} in {row.get(category_column, '') if category_column else 'career'} field",
         }
 
     def filter_by_category(self, category: str) -> list[dict[str, Any]]:
@@ -309,14 +318,22 @@ class OpportunityEngine:
         if self.opportunities_df is None:
             self.load_opportunities()
 
-        filtered = self.opportunities_df[self.opportunities_df["type"].str.lower() == category.lower()]
+        name_column = self._resolve_column("name", "opportunity_name", "title", "event_name", "position")
+        type_column = self._resolve_column("type", "opportunity_type", "category")
+        category_column = self._resolve_column("category", "domain", "field")
+        deadline_column = self._resolve_column("deadline", "application_deadline", "registration_deadline")
+        if not type_column:
+            logger.warning("Opportunity category filter unavailable. Columns: %s", list(self.opportunities_df.columns))
+            return []
+
+        filtered = self.opportunities_df[self.opportunities_df[type_column].astype(str).str.lower() == category.lower()]
 
         return [
             {
-                "name": row.get("name", ""),
-                "type": row.get("type", ""),
-                "category": row.get("category", ""),
-                "deadline": row.get("deadline", ""),
+                "name": row.get(name_column, "") if name_column else "",
+                "type": row.get(type_column, ""),
+                "category": row.get(category_column, "") if category_column else "",
+                "deadline": row.get(deadline_column, "") if deadline_column else "",
             }
             for _, row in filtered.iterrows()
         ]
@@ -336,14 +353,22 @@ class OpportunityEngine:
         if self.opportunities_df is None:
             self.load_opportunities()
 
-        filtered = self.opportunities_df[self.opportunities_df["skills"].str.contains(skill, case=False, na=False)]
+        name_column = self._resolve_column("name", "opportunity_name", "title", "event_name", "position")
+        type_column = self._resolve_column("type", "opportunity_type", "category")
+        skills_column = self._resolve_column("skills", "required_skills", "skills_required")
+        deadline_column = self._resolve_column("deadline", "application_deadline", "registration_deadline")
+        if not skills_column:
+            logger.warning("Opportunity skill filter unavailable. Columns: %s", list(self.opportunities_df.columns))
+            return []
+
+        filtered = self.opportunities_df[self.opportunities_df[skills_column].astype(str).str.contains(skill, case=False, na=False)]
 
         return [
             {
-                "name": row.get("name", ""),
-                "type": row.get("type", ""),
-                "skills": row.get("skills", ""),
-                "deadline": row.get("deadline", ""),
+                "name": row.get(name_column, "") if name_column else "",
+                "type": row.get(type_column, "") if type_column else "",
+                "skills": row.get(skills_column, ""),
+                "deadline": row.get(deadline_column, "") if deadline_column else "",
             }
             for _, row in filtered.iterrows()
         ]
@@ -363,15 +388,22 @@ class OpportunityEngine:
         if self.opportunities_df is None:
             self.load_opportunities()
 
+        name_column = self._resolve_column("name", "opportunity_name", "title", "event_name", "position")
+        type_column = self._resolve_column("type", "opportunity_type", "category")
+        deadline_column = self._resolve_column("deadline", "application_deadline", "registration_deadline")
+        if not deadline_column:
+            logger.warning("Upcoming deadlines unavailable. Columns: %s", list(self.opportunities_df.columns))
+            return []
+
         # For now, return all opportunities with deadlines
         upcoming = []
         for _, row in self.opportunities_df.iterrows():
-            deadline = row.get("deadline", "")
+            deadline = row.get(deadline_column, "")
             if deadline:
                 upcoming.append(
                     {
-                        "name": row.get("name", ""),
-                        "type": row.get("type", ""),
+                        "name": row.get(name_column, "") if name_column else "",
+                        "type": row.get(type_column, "") if type_column else "",
                         "deadline": deadline,
                         "days_remaining": "Calculated based on deadline",
                     }

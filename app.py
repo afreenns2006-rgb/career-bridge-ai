@@ -35,7 +35,18 @@ from services.language import get_language_names, normalize_language, translate
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-load_dotenv()
+if Path(".env").exists():
+    load_dotenv()
+
+
+def get_runtime_setting(name: str, default: str = "") -> str:
+    """Read Streamlit secrets first, then environment variables, without failing on deployment."""
+    try:
+        if name in st.secrets:
+            return str(st.secrets[name])
+    except Exception:
+        pass
+    return os.getenv(name, default)
 
 
 # Configure Streamlit page
@@ -88,6 +99,19 @@ def initialize_session_state() -> None:
 
     if "ai_assistant_warning" not in st.session_state:
         st.session_state.ai_assistant_warning = False
+
+    if "language" not in st.session_state:
+        st.session_state.language = normalize_language(
+            st.session_state.get("selected_language") or os.getenv("DEFAULT_LANGUAGE", "English")
+        )
+    else:
+        st.session_state.language = normalize_language(st.session_state.language)
+
+    # Keep the older key in sync for existing AI/language code paths.
+    st.session_state.selected_language = st.session_state.language
+
+    if "language_selector" not in st.session_state:
+        st.session_state.language_selector = st.session_state.language
 
 
 def render_sidebar() -> str:
@@ -842,13 +866,13 @@ def render_ai_career_assistant() -> None:
 
     Supports local Ollama, BYOK providers, and a rule-based fallback.
     """
-    st.header("AI Career Assistant")
-    st.write("Ask career questions and get a roadmap, resume tips, interview questions, skills, and project ideas.")
+    st.header(t("ai_career_assistant"))
+    st.write(t("career_subtitle"))
 
-    language = normalize_language(st.session_state.get("selected_language", "English"))
-    st.info(f"Selected response language: **{language}**")
+    language = selected_language()
+    st.info(f"{t('selected_response_language')}: **{language}**")
 
-    with st.expander("AI Provider Settings", expanded=True):
+    with st.expander(t("ai_provider_settings"), expanded=True):
         provider = st.radio(
             "Provider",
             ["Local Ollama", "BYOK", "Rule-based fallback"],
@@ -861,13 +885,13 @@ def render_ai_career_assistant() -> None:
             if provider == "BYOK":
                 model_name = st.text_input(
                     "Model name",
-                    value=os.getenv("BYOK_MODEL", DEFAULT_BYOK_MODEL),
+                    value=get_runtime_setting("BYOK_MODEL", DEFAULT_BYOK_MODEL),
                     help="Use the model name supported by your provider.",
                 )
             else:
                 model_name = st.text_input(
                     "Ollama model name",
-                    value=os.getenv("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL),
+                    value=get_runtime_setting("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL),
                     help="Default is llama3. Example: llama3, mistral, gemma.",
                 )
 
@@ -875,14 +899,14 @@ def render_ai_career_assistant() -> None:
             if provider == "BYOK":
                 byok_endpoint = st.text_input(
                     "BYOK API endpoint",
-                    value=os.getenv("BYOK_API_URL", DEFAULT_BYOK_ENDPOINT),
+                    value=get_runtime_setting("BYOK_API_URL", DEFAULT_BYOK_ENDPOINT),
                     help="OpenAI-compatible chat completions endpoint.",
                 )
             else:
                 byok_endpoint = DEFAULT_BYOK_ENDPOINT
                 st.text_input(
                     "Ollama API URL",
-                    value=os.getenv("OLLAMA_API_URL", OLLAMA_GENERATE_URL),
+                    value=get_runtime_setting("OLLAMA_API_URL", OLLAMA_GENERATE_URL),
                     key="ollama_url_input",
                     help="Local Ollama generate endpoint.",
                 )
@@ -890,7 +914,7 @@ def render_ai_career_assistant() -> None:
         if provider == "BYOK":
             api_token = st.text_input(
                 "API key/token",
-                value="",
+                value=get_runtime_setting("BYOK_API_KEY", ""),
                 type="password",
                 help="Your token is used only for this Streamlit session and is not saved in the repository.",
             )
@@ -899,10 +923,10 @@ def render_ai_career_assistant() -> None:
             api_token = ""
             ollama_url = st.session_state.get("ollama_url_input", OLLAMA_GENERATE_URL)
 
-    st.markdown("### Your Question")
+    st.markdown(f"### {t('your_question')}")
     question = st.text_area(
-        "Ask anything career-related",
-        placeholder="Example: I know Python and SQL. How can I become a data analyst?",
+        t("ask_career_related"),
+        placeholder=t("career_question_placeholder"),
         height=130,
     )
 
@@ -912,7 +936,7 @@ def render_ai_career_assistant() -> None:
         "skills": st.session_state.user_profile.get("skills") or resume_skills,
     }
 
-    if st.button("Generate AI Guidance", key="generate_ai_guidance"):
+    if st.button(t("generate_ai_guidance"), key="generate_ai_guidance"):
         config = AIProviderConfig(
             provider=provider,
             language=language,
@@ -922,13 +946,13 @@ def render_ai_career_assistant() -> None:
             byok_endpoint=byok_endpoint,
         )
 
-        with st.spinner("Generating career guidance..."):
+        with st.spinner(t("generating_career_guidance")):
             st.session_state.ai_assistant_response = generate_ai_response(question, config, profile)
             st.session_state.ai_assistant_warning = is_ai_warning_response(st.session_state.ai_assistant_response)
 
     if st.session_state.ai_assistant_response:
         st.markdown("---")
-        st.markdown("### AI Guidance")
+        st.markdown(f"### {t('ai_guidance')}")
         if st.session_state.get("ai_assistant_warning"):
             st.warning(st.session_state.ai_assistant_response)
             return
@@ -938,6 +962,7 @@ def render_ai_career_assistant() -> None:
 def is_ai_warning_response(response: str) -> bool:
     """Detect provider errors that should be shown as Streamlit warnings."""
     warning_markers = [
+        "AI service unavailable",
         "Please enter",
         "I could not connect",
         "I could not reach",
@@ -952,7 +977,7 @@ def is_ai_warning_response(response: str) -> bool:
 
 def selected_language() -> str:
     """Return the selected UI language with a safe fallback."""
-    return normalize_language(st.session_state.get("selected_language", "English"))
+    return normalize_language(st.session_state.get("language") or st.session_state.get("selected_language", "English"))
 
 
 def t(key: str) -> str:
@@ -960,10 +985,17 @@ def t(key: str) -> str:
     return translate(key, selected_language())
 
 
+def sync_language_state() -> None:
+    """Keep the UI language and AI response language in sync after dropdown changes."""
+    selected = st.session_state.get("language_selector", "English")
+    st.session_state.language = normalize_language(selected)
+    st.session_state.selected_language = st.session_state.language
+
+
 def render_sidebar() -> str:
     """Render sidebar navigation with translated labels but stable route values."""
     st.sidebar.title("Career Bridge AI")
-    st.sidebar.write("Your Personal Career Guidance Platform")
+    st.sidebar.write(t("app_tagline"))
     st.sidebar.divider()
 
     page_keys = [
@@ -998,9 +1030,9 @@ def render_sidebar() -> str:
 
     st.sidebar.divider()
     st.sidebar.markdown(f"### {t('quick_links')}")
-    st.sidebar.markdown("[Documentation](https://github.com/CareerBridgeAI)")
-    st.sidebar.markdown("[Report Issue](https://github.com/CareerBridgeAI/issues)")
-    st.sidebar.markdown("[Contact Us](mailto:support@careerbridgeai.com)")
+    st.sidebar.markdown(f"[{t('documentation')}](https://github.com/CareerBridgeAI)")
+    st.sidebar.markdown(f"[{t('report_issue')}](https://github.com/CareerBridgeAI/issues)")
+    st.sidebar.markdown(f"[{t('contact_us')}](mailto:support@careerbridgeai.com)")
 
     return page
 
@@ -1010,23 +1042,41 @@ def render_language_selector() -> None:
     st.sidebar.divider()
     language_options = get_language_names()
 
-    if "selected_language" in st.session_state and st.session_state.selected_language in language_options:
-        st.sidebar.selectbox(
-            translate("language", st.session_state.selected_language),
-            options=language_options,
-            key="selected_language",
-            help="AI Career Assistant responses and main UI labels use this language.",
-        )
-        return
+    if "language" not in st.session_state or st.session_state.language not in language_options:
+        st.session_state.language = normalize_language(st.session_state.get("selected_language", "English"))
 
-    default_language = normalize_language(os.getenv("DEFAULT_LANGUAGE", "English"))
+    if "language_selector" not in st.session_state or st.session_state.language_selector not in language_options:
+        st.session_state.language_selector = st.session_state.language
+
     st.sidebar.selectbox(
-        translate("language", default_language),
+        t("language"),
         options=language_options,
-        index=language_options.index(default_language),
-        key="selected_language",
+        key="language_selector",
+        on_change=sync_language_state,
         help="AI Career Assistant responses and main UI labels use this language.",
     )
+
+
+def render_home_page() -> None:
+    """Render a translated landing dashboard for the selected language."""
+    st.title(t("home_title"))
+    st.write(t("home_subtitle"))
+    st.info(t("home_intro"))
+
+    st.markdown(f"### {t('main_features')}")
+    feature_keys = [
+        "resume_analyzer",
+        "career_mentor",
+        "scholarship_finder",
+        "government_schemes",
+        "opportunities",
+        "learning_roadmap",
+        "ai_career_assistant",
+    ]
+    cols = st.columns(2)
+    for index, feature_key in enumerate(feature_keys):
+        with cols[index % 2]:
+            st.write(f"- **{t(feature_key)}**")
 
 
 def render_resume_analyzer() -> None:
@@ -1040,12 +1090,7 @@ def render_resume_analyzer() -> None:
         return
 
     try:
-        file_path = Path("uploads") / uploaded_file.name
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(file_path, "wb") as file:
-            file.write(uploaded_file.getbuffer())
-
-        parser = ResumeParser(file_path)
+        parser = ResumeParser.from_upload(uploaded_file)
         if not parser.validate_resume():
             st.error(t("resume_extract_error"))
             return
@@ -1079,9 +1124,9 @@ def render_resume_analyzer() -> None:
 
     st.success(t("resume_success"))
     col1, col2, col3 = st.columns(3)
-    col1.metric("ATS Score", f"{ats_score:.1f}/100", delta="Good" if ats_score > 70 else "Needs Improvement")
-    col2.metric("Skills Found", len(skills), delta=f"+{len(skills)}")
-    col3.metric("Education", len(education), delta="Complete" if education else "Missing")
+    col1.metric(t("ats_score"), f"{ats_score:.1f}/100", delta=t("good") if ats_score > 70 else t("needs_improvement"))
+    col2.metric(t("skills_found"), len(skills), delta=f"+{len(skills)}")
+    col3.metric(t("education"), len(education), delta=t("complete") if education else t("missing"))
 
     st.markdown("---")
     st.markdown(f"## {t('extracted_skills')}")
@@ -1090,6 +1135,21 @@ def render_resume_analyzer() -> None:
             st.write(f"- {skill}")
     else:
         st.warning(t("no_skills_detected"))
+
+    st.markdown(f"## {t('skill_gaps')}")
+    resume_recommendations = get_career_recommendations_safely(
+        user_skills=skills,
+        education=education[0].get("type", "Not provided") if education else "Not provided",
+        experience_years=len(experience),
+        preferences={"domain": "resume"},
+    )
+    top_recommendation = resume_recommendations[0] if resume_recommendations else {}
+    missing_skills = top_recommendation.get("missing_skills") or []
+    if missing_skills:
+        for skill in missing_skills:
+            st.write(f"- {skill}")
+    else:
+        st.success(t("no_major_gap"))
 
     st.markdown(f"## {t('education')}")
     if education:
@@ -1124,12 +1184,6 @@ def render_resume_analyzer() -> None:
 
     st.markdown("---")
     st.markdown(f"## {t('career_suggestions')}")
-    resume_recommendations = get_career_recommendations_safely(
-        user_skills=skills,
-        education=education[0].get("type", "Not provided") if education else "Not provided",
-        experience_years=len(experience),
-        preferences={"domain": "resume"},
-    )
     display_career_cards(resume_recommendations[:3])
 
 
@@ -1148,6 +1202,7 @@ def render_career_mentor() -> None:
             t("career_domain"),
             ["Software", "Data", "AI/ML", "Web Development", "Cloud", "Cybersecurity", "Business"],
         )
+        interests = st.text_input(t("interests"), placeholder="AI, web development, data, government jobs")
 
     skill_options = [
         "python",
@@ -1174,18 +1229,21 @@ def render_career_mentor() -> None:
         options=skill_options,
         default=default_skills,
     )
+    goals = st.text_area(t("career_goals"), placeholder="Example: I want an entry-level tech job in 6 months.", height=90)
 
     st.session_state.user_profile["education_level"] = education_level
     st.session_state.user_profile["experience_years"] = experience_years
     st.session_state.user_profile["skills"] = skills_input
+    st.session_state.user_profile["interests"] = interests
+    st.session_state.user_profile["goals"] = goals
 
-    if st.button(t("get_recommendations"), key="career_recommendations_widget"):
+    if st.button(t("get_career_recommendation"), key="career_recommendations_widget"):
         with st.spinner(t("recommendation_spinner")):
             recommendations = get_career_recommendations_safely(
                 user_skills=skills_input,
                 education=education_level,
                 experience_years=experience_years,
-                preferences={"domain": career_domain},
+                preferences={"domain": career_domain, "interests": interests, "goals": goals},
             )
         st.session_state.career_recommendations_data = recommendations
 
@@ -1254,7 +1312,7 @@ def display_career_cards(recommendations: list[dict[str, object]]) -> None:
 
     st.markdown("---")
     for idx, rec in enumerate(recommendations, 1):
-        career_name = clean_display_value(rec.get("career_name"), "Recommended Career Path")
+        career_name = clean_display_value(rec.get("career_name"), t("recommended_career_path"))
         required_skills = rec.get("required_skills") or []
         matching_skills = rec.get("matching_skills") or []
         missing_skills = rec.get("missing_skills") or []
@@ -1276,7 +1334,7 @@ def display_career_cards(recommendations: list[dict[str, object]]) -> None:
 
                 st.markdown(f"**{t('required_skills')}:** " + (", ".join(required_skills) if required_skills else t("not_available")))
                 st.markdown(f"**{t('matching_skills')}:** " + (", ".join(matching_skills) if matching_skills else t("not_available")))
-                st.markdown(f"**{t('skill_gaps')}:** " + (", ".join(missing_skills) if missing_skills else "No major gap detected"))
+                st.markdown(f"**{t('skill_gaps')}:** " + (", ".join(missing_skills) if missing_skills else t("no_major_gap")))
 
                 if roadmap:
                     st.markdown(f"**{t('recommended_learning_path')}:**")
@@ -1293,8 +1351,8 @@ def display_career_cards(recommendations: list[dict[str, object]]) -> None:
                     st.info(t("rule_based_fallback"))
                 if st.button(t("learn_more"), key=f"career_more_{idx}_{career_name}"):
                     st.info(
-                        f"Recommended Career Path: {career_name}\n\n"
-                        f"Required Skills: {', '.join(required_skills) if required_skills else 'Core role skills'}"
+                        f"{t('recommended_career_path')}: {career_name}\n\n"
+                        f"{t('required_skills')}: {', '.join(required_skills) if required_skills else t('core_role_skills')}"
                     )
             st.divider()
 
@@ -1311,31 +1369,40 @@ def main() -> None:
     # Initialize session state
     initialize_session_state()
 
-    # Initialize database
-    get_db_manager()
+    # Initialize database without blocking the UI if persistence is unavailable.
+    try:
+        get_db_manager()
+    except Exception as exc:
+        logger.exception("Database initialization failed: %s", exc)
+        st.warning("Database is unavailable. The app will continue with in-memory results for this session.")
 
     # Render sidebar and get selected page
     page = render_sidebar()
 
     # Route to selected page
-    if page == "Home":
-        render_home_page()
-    elif page == "Resume Analyzer":
-        render_resume_analyzer()
-    elif page == "Career Mentor":
-        render_career_mentor()
-    elif page == "Scholarship Finder":
-        render_scholarship_finder()
-    elif page == "Government Schemes":
-        render_scheme_recommender()
-    elif page == "Opportunities":
-        render_opportunity_dashboard()
-    elif page == "Learning Roadmap":
-        render_roadmap_generator()
-    elif page == "AI Career Assistant":
-        render_ai_career_assistant()
-    else:
-        render_home_page()
+    try:
+        if page == "Home":
+            render_home_page()
+        elif page == "Resume Analyzer":
+            render_resume_analyzer()
+        elif page == "Career Mentor":
+            render_career_mentor()
+        elif page == "Scholarship Finder":
+            render_scholarship_finder()
+        elif page == "Government Schemes":
+            render_scheme_recommender()
+        elif page == "Opportunities":
+            render_opportunity_dashboard()
+        elif page == "Learning Roadmap":
+            render_roadmap_generator()
+        elif page == "AI Career Assistant":
+            render_ai_career_assistant()
+        else:
+            render_home_page()
+    except Exception as exc:
+        logger.exception("Page failed to render: %s", exc)
+        st.error("This page could not load right now.")
+        st.warning("Please try again or use another feature. The rest of Career Bridge AI is still available.")
 
 
 if __name__ == "__main__":

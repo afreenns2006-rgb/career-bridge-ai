@@ -11,6 +11,8 @@ OLLAMA_GENERATE_URL = "http://localhost:11434/api/generate"
 DEFAULT_OLLAMA_MODEL = "llama3"
 DEFAULT_BYOK_ENDPOINT = "https://api.openai.com/v1/chat/completions"
 DEFAULT_BYOK_MODEL = "gpt-4o-mini"
+AI_REQUEST_TIMEOUT_SECONDS = 20
+AI_FALLBACK_NOTICE = "AI service unavailable. Showing fallback recommendation."
 
 
 @dataclass
@@ -66,14 +68,27 @@ def generate_ai_response(question: str, config: AIProviderConfig, profile: dict[
         return _generate_with_ollama(prompt, question, config)
 
     if config.provider == "BYOK":
-        return _generate_with_byok(prompt, question, config)
+        byok_response = _generate_with_byok(prompt, question, config)
+        if not _is_fallback_response(byok_response):
+            return byok_response
+
+        ollama_response = _generate_with_ollama(prompt, question, config)
+        if not _is_fallback_response(ollama_response):
+            return ollama_response
+
+        return byok_response
 
     return build_rule_based_response(question, config.language)
 
 
 def _fallback_with_reason(reason: str, question: str, language: str) -> str:
     """Return a friendly provider warning plus safe offline guidance."""
-    return f"{reason}\n\nHere is safe offline guidance instead:\n\n{build_rule_based_response(question, language)}"
+    return f"{AI_FALLBACK_NOTICE}\n\n{reason}\n\nHere is safe offline guidance instead:\n\n{build_rule_based_response(question, language)}"
+
+
+def _is_fallback_response(response: str) -> bool:
+    """Detect responses that already fell back from an unavailable AI service."""
+    return AI_FALLBACK_NOTICE in response
 
 
 def _generate_with_ollama(prompt: str, question: str, config: AIProviderConfig) -> str:
@@ -86,7 +101,7 @@ def _generate_with_ollama(prompt: str, question: str, config: AIProviderConfig) 
                 "prompt": prompt,
                 "stream": False,
             },
-            timeout=60,
+            timeout=AI_REQUEST_TIMEOUT_SECONDS,
         )
         response.raise_for_status()
         data = response.json()
@@ -141,7 +156,7 @@ def _generate_with_byok(prompt: str, question: str, config: AIProviderConfig) ->
                 ],
                 "temperature": 0.4,
             },
-            timeout=60,
+            timeout=AI_REQUEST_TIMEOUT_SECONDS,
         )
         response.raise_for_status()
         data = response.json()

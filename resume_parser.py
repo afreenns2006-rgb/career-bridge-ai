@@ -5,6 +5,7 @@ Handles resume file processing, text extraction, skill identification,
 and ATS scoring.
 """
 
+from io import BytesIO
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 import logging
@@ -90,7 +91,7 @@ class ResumeParser:
     and ATS score calculation.
     """
 
-    def __init__(self, file_path: Path) -> None:
+    def __init__(self, file_path: Path | None = None, file_name: str | None = None, file_bytes: bytes | None = None) -> None:
         """
         Initialize resume parser with a file path.
 
@@ -100,8 +101,18 @@ class ResumeParser:
         TODO: Implement parser initialization.
         """
         self.file_path = file_path
+        self.file_name = file_name or (file_path.name if file_path else "uploaded_resume")
+        self.file_bytes = file_bytes
         self.text: Optional[str] = None
         self.metadata: dict[str, Any] = {}
+
+    @classmethod
+    def from_upload(cls, uploaded_file: Any) -> "ResumeParser":
+        """Create a parser from a Streamlit UploadedFile without writing to disk."""
+        return cls(
+            file_name=getattr(uploaded_file, "name", "uploaded_resume"),
+            file_bytes=uploaded_file.getvalue(),
+        )
 
     def extract_text(self) -> str:
         """
@@ -119,10 +130,10 @@ class ResumeParser:
 
         TODO: Implement text extraction from multiple formats.
         """
-        if not self.file_path.exists():
+        if self.file_bytes is None and (self.file_path is None or not self.file_path.exists()):
             raise FileNotFoundError(f"Resume file not found: {self.file_path}")
 
-        file_ext = self.file_path.suffix.lower()
+        file_ext = Path(self.file_name).suffix.lower()
 
         try:
             if file_ext == ".pdf":
@@ -147,7 +158,8 @@ class ResumeParser:
 
         text_parts = []
         try:
-            with open(self.file_path, "rb") as file:
+            file_obj = BytesIO(self.file_bytes) if self.file_bytes is not None else open(self.file_path, "rb")
+            with file_obj as file:
                 reader = PdfReader(file)
                 for page in reader.pages:
                     page_text = page.extract_text() or ""
@@ -166,7 +178,7 @@ class ResumeParser:
 
         text_parts = []
         try:
-            doc = Document(self.file_path)
+            doc = Document(BytesIO(self.file_bytes)) if self.file_bytes is not None else Document(self.file_path)
             for paragraph in doc.paragraphs:
                 if paragraph.text.strip():
                     text_parts.append(paragraph.text)
@@ -183,6 +195,11 @@ class ResumeParser:
     def _extract_from_txt(self) -> str:
         """Extract text from TXT file."""
         try:
+            if self.file_bytes is not None:
+                try:
+                    return self.file_bytes.decode("utf-8")
+                except UnicodeDecodeError:
+                    return self.file_bytes.decode("latin-1", errors="ignore")
             with open(self.file_path, encoding="utf-8") as file:
                 return file.read()
         except Exception as e:
@@ -335,7 +352,7 @@ class ResumeParser:
             self.extract_text()
 
         return {
-            "filename": self.file_path.name,
+            "filename": self.file_name,
             "text_length": len(self.text) if self.text else 0,
             "skills": self.extract_skills(),
             "education": self.extract_education(),
@@ -355,18 +372,19 @@ class ResumeParser:
 
         TODO: Implement validation checks.
         """
-        # Check file exists
-        if not self.file_path.exists():
+        # Check file exists or upload bytes are available.
+        if self.file_bytes is None and (self.file_path is None or not self.file_path.exists()):
             return False
 
         # Check file format
         valid_formats = {".pdf", ".docx", ".txt"}
-        if self.file_path.suffix.lower() not in valid_formats:
+        if Path(self.file_name).suffix.lower() not in valid_formats:
             return False
 
         # Check file size (max 10MB)
         max_size = 10 * 1024 * 1024
-        if self.file_path.stat().st_size > max_size:
+        file_size = len(self.file_bytes) if self.file_bytes is not None else self.file_path.stat().st_size
+        if file_size > max_size:
             return False
 
         # Try to extract text

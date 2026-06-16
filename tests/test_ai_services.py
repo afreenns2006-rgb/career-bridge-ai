@@ -1,5 +1,5 @@
 from services.ai_provider import AIProviderConfig, build_career_assistant_prompt, generate_ai_response
-from services.language import get_language_instruction, get_language_names
+from services.language import get_language_instruction, get_language_names, translate
 
 
 def test_supported_languages_include_required_options() -> None:
@@ -8,6 +8,12 @@ def test_supported_languages_include_required_options() -> None:
     assert "English" in languages
     assert "Hindi" in languages
     assert "Telugu" in languages
+
+
+def test_ui_translation_uses_selected_language_and_fallback() -> None:
+    assert translate("resume_analyzer", "Hindi") == "रिज्यूमे विश्लेषक"
+    assert translate("resume_analyzer", "Telugu") == "రెజ్యూమే విశ్లేషణ"
+    assert translate("missing_key", "Hindi") == "missing_key"
 
 
 def test_prompt_uses_selected_language_instruction() -> None:
