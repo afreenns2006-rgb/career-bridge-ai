@@ -1010,6 +1010,26 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         Language.ENGLISH: "Get an API key from your provider",
         Language.HINDI: "अपने प्रदाता से एपीआई कुंजी प्राप्त करें",
         Language.TELUGU: "మీ ప్రదాతా నుండి ఎపిఐ కీని పొందండి"
+    },
+    "topics_to_learn": {
+        Language.ENGLISH: "Topics to Learn",
+        Language.HINDI: "सीखने के लिए विषय",
+        Language.TELUGU: "నేర్చుకోవలసిన విషయాలు"
+    },
+    "projects_to_build": {
+        Language.ENGLISH: "Projects to Build",
+        Language.HINDI: "बनाने के लिए परियोजनाएं",
+        Language.TELUGU: "నిర్మించవలసిన ప్రాజెక్టులు"
+    },
+    "topics": {
+        Language.ENGLISH: "Topics",
+        Language.HINDI: "विषय",
+        Language.TELUGU: "విషయాలు"
+    },
+    "no_roadmap_generated": {
+        Language.ENGLISH: "No roadmap generated. Please click 'Generate Learning Roadmap' button to create your personalized roadmap.",
+        Language.HINDI: "कोई रोडमैप उत्पन्न नहीं हुआ। अपना व्यक्तिगत रोडमैप बनाने के लिए 'सीखने का रोडमैप बनाएं' बटन पर क्लिक करें।",
+        Language.TELUGU: "ఎటువంటి రోడ్‌మ్యాప్ ఉత్పత్తి చేయబడలేదు. మీ ఆ కేంద్రీకృత రోడ్‌మ్యాప్‌ను సృష్టించడానికి 'సిద్ధాంత రోడ్‌మ్యాప్ ఉత్పత్తి చేయండి' బటన్‌ను క్లిక్ చేయండి."
     }
 }
 

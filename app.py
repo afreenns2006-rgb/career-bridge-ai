@@ -871,28 +871,71 @@ def render_roadmap_generator() -> None:
         st.markdown(f"## {get_text('monthly_breakdown', st.session_state.language)}")
         monthly_goals = learning_plan.get("monthly_goals", [])
         
+        if not monthly_goals:
+            st.warning(get_text("no_roadmap_generated", st.session_state.language))
+            return
+        
         for month_data in monthly_goals:
             month = month_data.get("month", 1)
+            title = month_data.get("title", f"Month {month}")
             skills = month_data.get("skills_to_develop", [])
+            topics = month_data.get("topics_to_learn", [])
+            projects = month_data.get("projects_to_build", [])
             hours = month_data.get("estimated_hours", 0)
+            resources = month_data.get("resources", [])
             
-            with st.expander(f"Month {month}: {', '.join(skills[:2])}{'...' if len(skills) > 2 else ''}"):
-                st.write(f"**{get_text('estimated_hours', st.session_state.language)}:** {hours}")
-                st.write(f"**{get_text('skills_to_develop', st.session_state.language)}:**")
-                for skill in skills:
-                    st.write(f"• {skill}")
+            # Create a comprehensive expander for each month
+            with st.expander(f"📅 {title}"):
+                # Hours metric
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("⏱️ " + get_text('estimated_hours', st.session_state.language), f"{hours} hrs")
+                with col2:
+                    st.metric("🎯 " + get_text('skills_to_develop', st.session_state.language), len(skills))
+                with col3:
+                    st.metric("📚 " + get_text('topics', st.session_state.language), len(topics))
                 
-                # Get resources
-                roadmap_engine = RoadmapGenerator()
-                resources = []
-                for skill in skills:
-                    skill_resources = roadmap_engine.recommend_resources(skill)
-                    resources.extend(skill_resources)
+                st.divider()
                 
+                # Skills section
+                if skills:
+                    st.markdown(f"**🎯 {get_text('skills_to_develop', st.session_state.language)}:**")
+                    skill_cols = st.columns(min(3, len(skills)))
+                    for idx, skill in enumerate(skills):
+                        with skill_cols[idx % len(skill_cols)]:
+                            st.write(f"• {skill}")
+                else:
+                    st.info("No skills to develop this month")
+                
+                st.divider()
+                
+                # Topics section
+                if topics:
+                    st.markdown(f"**📖 {get_text('topics_to_learn', st.session_state.language)}:**")
+                    for topic in topics:
+                        st.write(f"✓ {topic}")
+                else:
+                    st.info("Review topics from previous months")
+                
+                st.divider()
+                
+                # Projects section
+                if projects:
+                    st.markdown(f"**💻 {get_text('projects_to_build', st.session_state.language)}:**")
+                    for idx, project in enumerate(projects, 1):
+                        st.write(f"{idx}. {project}")
+                else:
+                    st.info("Practice exercises")
+                
+                st.divider()
+                
+                # Resources section
                 if resources:
-                    st.write(f"**{get_text('recommended_resources', st.session_state.language)}:**")
-                    for res in resources[:5]:
-                        st.write(f"• {res['name']}")
+                    st.markdown(f"**📚 {get_text('recommended_resources', st.session_state.language)}:**")
+                    for resource in resources:
+                        st.write(f"• {resource}")
+                else:
+                    st.info("Use Google, YouTube, and documentation")
         
         st.markdown("---")
         
