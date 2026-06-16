@@ -20,14 +20,14 @@ def test_get_config_exposes_upload_and_score_limits() -> None:
     assert settings["min_ats_score"] < settings["max_ats_score"]
 
 
-def test_required_repository_tooling_files_exist() -> None:
+def test_required_application_files_exist() -> None:
     expected_files = [
-        "pyproject.toml",
-        "requirements-dev.txt",
-        ".pre-commit-config.yaml",
-        ".gitlab-ci.yml",
-        ".gitleaks.toml",
-        "cliff.toml",
+        "app.py",
+        "career_engine.py",
+        "resume_parser.py",
+        "requirements.txt",
+        "services/ai_provider.py",
+        "services/language.py",
     ]
 
     for relative_path in expected_files:

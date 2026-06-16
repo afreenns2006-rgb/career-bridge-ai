@@ -29,7 +29,7 @@ from services.ai_provider import (
     AIProviderConfig,
     generate_ai_response,
 )
-from services.language import get_language_names, normalize_language
+from services.language import get_language_names, normalize_language, translate
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -272,7 +272,7 @@ def render_resume_analyzer() -> None:
         parser = ResumeParser(file_path)
 
         if not parser.validate_resume():
-            st.error("❌ Invalid resume. Please upload a valid resume file.")
+            st.error("Could not extract text from the resume. Please upload a readable PDF/DOCX.")
             return
 
         # Extract information
@@ -948,6 +948,355 @@ def is_ai_warning_response(response: str) -> bool:
         "returned an empty response",
     ]
     return any(marker in response for marker in warning_markers)
+
+
+def selected_language() -> str:
+    """Return the selected UI language with a safe fallback."""
+    return normalize_language(st.session_state.get("selected_language", "English"))
+
+
+def t(key: str) -> str:
+    """Translate a UI label using the selected language."""
+    return translate(key, selected_language())
+
+
+def render_sidebar() -> str:
+    """Render sidebar navigation with translated labels but stable route values."""
+    st.sidebar.title("Career Bridge AI")
+    st.sidebar.write("Your Personal Career Guidance Platform")
+    st.sidebar.divider()
+
+    page_keys = [
+        "Home",
+        "Resume Analyzer",
+        "Career Mentor",
+        "Scholarship Finder",
+        "Government Schemes",
+        "Opportunities",
+        "Learning Roadmap",
+        "AI Career Assistant",
+    ]
+    page_translation_keys = {
+        "Home": "home",
+        "Resume Analyzer": "resume_analyzer",
+        "Career Mentor": "career_mentor",
+        "Scholarship Finder": "scholarship_finder",
+        "Government Schemes": "government_schemes",
+        "Opportunities": "opportunities",
+        "Learning Roadmap": "learning_roadmap",
+        "AI Career Assistant": "ai_career_assistant",
+    }
+
+    page = st.sidebar.radio(
+        t("navigation"),
+        options=page_keys,
+        index=0,
+        format_func=lambda page_name: t(page_translation_keys[page_name]),
+    )
+
+    render_language_selector()
+
+    st.sidebar.divider()
+    st.sidebar.markdown(f"### {t('quick_links')}")
+    st.sidebar.markdown("[Documentation](https://github.com/CareerBridgeAI)")
+    st.sidebar.markdown("[Report Issue](https://github.com/CareerBridgeAI/issues)")
+    st.sidebar.markdown("[Contact Us](mailto:support@careerbridgeai.com)")
+
+    return page
+
+
+def render_language_selector() -> None:
+    """Render language selector without conflicting session_state defaults."""
+    st.sidebar.divider()
+    language_options = get_language_names()
+
+    if "selected_language" in st.session_state and st.session_state.selected_language in language_options:
+        st.sidebar.selectbox(
+            translate("language", st.session_state.selected_language),
+            options=language_options,
+            key="selected_language",
+            help="AI Career Assistant responses and main UI labels use this language.",
+        )
+        return
+
+    default_language = normalize_language(os.getenv("DEFAULT_LANGUAGE", "English"))
+    st.sidebar.selectbox(
+        translate("language", default_language),
+        options=language_options,
+        index=language_options.index(default_language),
+        key="selected_language",
+        help="AI Career Assistant responses and main UI labels use this language.",
+    )
+
+
+def render_resume_analyzer() -> None:
+    """Render a robust resume analyzer with readable-file handling."""
+    st.header(t("resume_header"))
+    st.write(t("resume_subtitle"))
+
+    uploaded_file = st.file_uploader(t("resume_upload"), type=["pdf", "docx", "txt"])
+
+    if uploaded_file is None:
+        return
+
+    try:
+        file_path = Path("uploads") / uploaded_file.name
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(file_path, "wb") as file:
+            file.write(uploaded_file.getbuffer())
+
+        parser = ResumeParser(file_path)
+        if not parser.validate_resume():
+            st.error(t("resume_extract_error"))
+            return
+
+        with st.spinner(t("resume_spinner")):
+            text = parser.extract_text()
+            if not text.strip():
+                st.error(t("resume_extract_error"))
+                return
+            skills = parser.extract_skills()
+            education = parser.extract_education()
+            experience = parser.extract_experience()
+            ats_score = parser.calculate_ats_score()
+    except ValueError as exc:
+        logger.warning("Unsupported resume upload: %s", exc)
+        st.error(t("resume_format_error"))
+        return
+    except Exception as exc:
+        logger.exception("Resume analysis failed: %s", exc)
+        st.error(t("resume_general_error"))
+        return
+
+    st.session_state.resume_data = {
+        "text": text,
+        "skills": skills,
+        "education": education,
+        "experience": experience,
+        "ats_score": ats_score,
+    }
+    st.session_state.user_profile["skills"] = skills
+
+    st.success(t("resume_success"))
+    col1, col2, col3 = st.columns(3)
+    col1.metric("ATS Score", f"{ats_score:.1f}/100", delta="Good" if ats_score > 70 else "Needs Improvement")
+    col2.metric("Skills Found", len(skills), delta=f"+{len(skills)}")
+    col3.metric("Education", len(education), delta="Complete" if education else "Missing")
+
+    st.markdown("---")
+    st.markdown(f"## {t('extracted_skills')}")
+    if skills:
+        for skill in sorted(skills):
+            st.write(f"- {skill}")
+    else:
+        st.warning(t("no_skills_detected"))
+
+    st.markdown(f"## {t('education')}")
+    if education:
+        for edu in education:
+            st.write(f"- {edu.get('type', 'Degree')}")
+    else:
+        st.info(t("no_education"))
+
+    st.markdown(f"## {t('work_experience')}")
+    if experience:
+        for exp in experience:
+            st.write(f"- {exp.get('title', 'Position')}")
+    else:
+        st.info(t("no_experience"))
+
+    st.markdown(f"## {t('improvement_suggestions')}")
+    suggestions = []
+    if ats_score < 50:
+        suggestions.append(t("suggest_keywords"))
+    if len(skills) < 5:
+        suggestions.append(t("suggest_skills"))
+    if not education:
+        suggestions.append(t("suggest_education"))
+    if not experience:
+        suggestions.append(t("suggest_experience"))
+
+    if suggestions:
+        for suggestion in suggestions:
+            st.write(f"- {suggestion}")
+    else:
+        st.success(t("resume_good"))
+
+    st.markdown("---")
+    st.markdown(f"## {t('career_suggestions')}")
+    resume_recommendations = get_career_recommendations_safely(
+        user_skills=skills,
+        education=education[0].get("type", "Not provided") if education else "Not provided",
+        experience_years=len(experience),
+        preferences={"domain": "resume"},
+    )
+    display_career_cards(resume_recommendations[:3])
+
+
+def render_career_mentor() -> None:
+    """Render career mentor with meaningful fallback recommendations."""
+    st.header(t("career_header"))
+    st.write(t("career_subtitle"))
+
+    st.markdown(f"### {t('your_profile')}")
+    col1, col2 = st.columns(2)
+    with col1:
+        experience_years = st.slider(t("years_experience"), 0, 50, 2)
+        education_level = st.selectbox(t("education_level"), ["10th", "12th", "UG", "PG", "Diploma"])
+    with col2:
+        career_domain = st.selectbox(
+            t("career_domain"),
+            ["Software", "Data", "AI/ML", "Web Development", "Cloud", "Cybersecurity", "Business"],
+        )
+
+    skill_options = [
+        "python",
+        "java",
+        "javascript",
+        "sql",
+        "machine learning",
+        "data analysis",
+        "web development",
+        "cloud computing",
+        "communication",
+        "leadership",
+        "problem solving",
+        "testing",
+        "html",
+        "css",
+        "git",
+    ]
+    resume_skills = st.session_state.resume_data.get("skills", []) if st.session_state.resume_data else []
+    default_skills = [skill for skill in resume_skills if skill in skill_options]
+
+    skills_input = st.multiselect(
+        t("your_skills"),
+        options=skill_options,
+        default=default_skills,
+    )
+
+    st.session_state.user_profile["education_level"] = education_level
+    st.session_state.user_profile["experience_years"] = experience_years
+    st.session_state.user_profile["skills"] = skills_input
+
+    if st.button(t("get_recommendations"), key="career_recommendations_widget"):
+        with st.spinner(t("recommendation_spinner")):
+            recommendations = get_career_recommendations_safely(
+                user_skills=skills_input,
+                education=education_level,
+                experience_years=experience_years,
+                preferences={"domain": career_domain},
+            )
+        st.session_state.career_recommendations_data = recommendations
+
+    recommendations = st.session_state.get("career_recommendations_data", [])
+    if recommendations:
+        st.success(t("recommendation_success"))
+        display_career_cards(recommendations)
+    else:
+        st.info(t("recommendation_prompt"))
+
+
+def clean_display_value(value: object, fallback: str) -> str:
+    """Avoid empty, null, or Unknown values in user-facing output."""
+    text = str(value).strip() if value is not None else ""
+    if not text or text.lower() in {"unknown", "nan", "none", "null"}:
+        return fallback
+    return text
+
+
+def get_career_recommendations_safely(
+    user_skills: list[str],
+    education: str,
+    experience_years: int,
+    preferences: dict[str, object] | None = None,
+) -> list[dict[str, object]]:
+    """Return meaningful career recommendations, falling back instead of showing Unknown."""
+    career_engine = CareerRecommendationEngine()
+    try:
+        recommendations = career_engine.recommend_careers(
+            user_skills=user_skills,
+            education=education,
+            experience_years=experience_years,
+            preferences=preferences,
+        )
+    except Exception as exc:
+        logger.exception("Career recommendation failed: %s", exc)
+        st.warning(t("recommendation_fallback"))
+        return career_engine.generate_fallback_recommendations(
+            user_skills=user_skills,
+            education=education,
+            experience_years=experience_years,
+            preferences=preferences,
+        )
+
+    meaningful = [
+        rec
+        for rec in recommendations
+        if clean_display_value(rec.get("career_name"), "") and clean_display_value(rec.get("career_name"), "") != ""
+    ]
+    if meaningful:
+        return meaningful
+
+    st.warning(t("recommendation_fallback"))
+    return career_engine.generate_fallback_recommendations(
+        user_skills=user_skills,
+        education=education,
+        experience_years=experience_years,
+        preferences=preferences,
+    )
+
+
+def display_career_cards(recommendations: list[dict[str, object]]) -> None:
+    """Display career recommendations with skill gaps and next steps."""
+    if not recommendations:
+        return
+
+    st.markdown("---")
+    for idx, rec in enumerate(recommendations, 1):
+        career_name = clean_display_value(rec.get("career_name"), "Recommended Career Path")
+        required_skills = rec.get("required_skills") or []
+        matching_skills = rec.get("matching_skills") or []
+        missing_skills = rec.get("missing_skills") or []
+        roadmap = rec.get("learning_roadmap") or []
+        next_steps = rec.get("suggested_next_steps") or []
+
+        with st.container():
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.markdown(f"### {idx}. {career_name}")
+                st.write(f"**{t('match_score')}:** {rec.get('match_score', 60)}%")
+                st.write(f"**{t('growth_potential')}:** {clean_display_value(rec.get('growth_potential'), 'Promising')}")
+                st.write(
+                    f"**{t('salary_range')}:** "
+                    f"{clean_display_value(rec.get('salary_range'), 'Varies by location and experience')}"
+                )
+                if rec.get("description"):
+                    st.write(str(rec["description"]))
+
+                st.markdown(f"**{t('required_skills')}:** " + (", ".join(required_skills) if required_skills else t("not_available")))
+                st.markdown(f"**{t('matching_skills')}:** " + (", ".join(matching_skills) if matching_skills else t("not_available")))
+                st.markdown(f"**{t('skill_gaps')}:** " + (", ".join(missing_skills) if missing_skills else "No major gap detected"))
+
+                if roadmap:
+                    st.markdown(f"**{t('recommended_learning_path')}:**")
+                    for item in roadmap:
+                        st.write(f"- {item}")
+
+                if next_steps:
+                    st.markdown(f"**{t('suggested_next_steps')}:**")
+                    for item in next_steps:
+                        st.write(f"- {item}")
+
+            with col2:
+                if rec.get("source") == "fallback":
+                    st.info(t("rule_based_fallback"))
+                if st.button(t("learn_more"), key=f"career_more_{idx}_{career_name}"):
+                    st.info(
+                        f"Recommended Career Path: {career_name}\n\n"
+                        f"Required Skills: {', '.join(required_skills) if required_skills else 'Core role skills'}"
+                    )
+            st.divider()
 
 
 def main() -> None:

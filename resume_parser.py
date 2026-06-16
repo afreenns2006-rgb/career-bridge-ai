@@ -12,9 +12,12 @@ import re
 from collections import Counter
 
 try:
-    import PyPDF2
+    from pypdf import PdfReader
 except ImportError:
-    PyPDF2 = None
+    try:
+        from PyPDF2 import PdfReader
+    except ImportError:
+        PdfReader = None
 
 try:
     from docx import Document
@@ -138,21 +141,22 @@ class ResumeParser:
 
     def _extract_from_pdf(self) -> str:
         """Extract text from PDF file."""
-        if not PyPDF2:
-            logger.warning("PyPDF2 not installed. Cannot extract PDF.")
+        if not PdfReader:
+            logger.warning("PDF reader is not installed. Cannot extract PDF.")
             return ""
 
-        text = ""
+        text_parts = []
         try:
             with open(self.file_path, "rb") as file:
-                reader = PyPDF2.PdfReader(file)
-                for page_num in range(len(reader.pages)):
-                    page = reader.pages[page_num]
-                    text += page.extract_text() + "\n"
+                reader = PdfReader(file)
+                for page in reader.pages:
+                    page_text = page.extract_text() or ""
+                    if page_text.strip():
+                        text_parts.append(page_text)
         except Exception as e:
             logger.error(f"Error reading PDF: {e}")
 
-        return text
+        return "\n".join(text_parts).strip()
 
     def _extract_from_docx(self) -> str:
         """Extract text from DOCX file."""
@@ -160,15 +164,21 @@ class ResumeParser:
             logger.warning("python-docx not installed. Cannot extract DOCX.")
             return ""
 
-        text = ""
+        text_parts = []
         try:
             doc = Document(self.file_path)
             for paragraph in doc.paragraphs:
-                text += paragraph.text + "\n"
+                if paragraph.text.strip():
+                    text_parts.append(paragraph.text)
+            for table in doc.tables:
+                for row in table.rows:
+                    for cell in row.cells:
+                        if cell.text.strip():
+                            text_parts.append(cell.text)
         except Exception as e:
             logger.error(f"Error reading DOCX: {e}")
 
-        return text
+        return "\n".join(text_parts).strip()
 
     def _extract_from_txt(self) -> str:
         """Extract text from TXT file."""
@@ -362,8 +372,6 @@ class ResumeParser:
         # Try to extract text
         try:
             text = self.extract_text()
-            if not text or len(text) < 100:
-                return False
-            return True
+            return bool(text and text.strip())
         except Exception:
             return False

@@ -63,15 +63,20 @@ def generate_ai_response(question: str, config: AIProviderConfig, profile: dict[
     prompt = build_career_assistant_prompt(question, config.language, profile)
 
     if config.provider == "Local Ollama":
-        return _generate_with_ollama(prompt, config)
+        return _generate_with_ollama(prompt, question, config)
 
     if config.provider == "BYOK":
-        return _generate_with_byok(prompt, config)
+        return _generate_with_byok(prompt, question, config)
 
     return build_rule_based_response(question, config.language)
 
 
-def _generate_with_ollama(prompt: str, config: AIProviderConfig) -> str:
+def _fallback_with_reason(reason: str, question: str, language: str) -> str:
+    """Return a friendly provider warning plus safe offline guidance."""
+    return f"{reason}\n\nHere is safe offline guidance instead:\n\n{build_rule_based_response(question, language)}"
+
+
+def _generate_with_ollama(prompt: str, question: str, config: AIProviderConfig) -> str:
     """Call the local Ollama generate API."""
     try:
         response = requests.post(
@@ -85,24 +90,41 @@ def _generate_with_ollama(prompt: str, config: AIProviderConfig) -> str:
         )
         response.raise_for_status()
         data = response.json()
-        return data.get("response", "").strip() or "Ollama returned an empty response. Please try again."
+        ai_text = data.get("response", "").strip()
+        if ai_text:
+            return ai_text
+        return _fallback_with_reason("Ollama returned an empty response.", question, config.language)
     except requests.exceptions.ConnectionError:
-        return (
+        return _fallback_with_reason(
             "I could not connect to Ollama. Please start Ollama locally, run "
-            f"`ollama pull {config.model_name or DEFAULT_OLLAMA_MODEL}`, and try again."
+            f"`ollama pull {config.model_name or DEFAULT_OLLAMA_MODEL}`, and try again.",
+            question,
+            config.language,
         )
     except requests.exceptions.Timeout:
-        return "Ollama took too long to respond. Please try again or use a smaller local model."
+        return _fallback_with_reason(
+            "Ollama took too long to respond. Please try again or use a smaller local model.",
+            question,
+            config.language,
+        )
     except requests.exceptions.RequestException as exc:
-        return f"Ollama returned an error: {exc}"
+        return _fallback_with_reason(f"Ollama returned an error: {exc}", question, config.language)
     except ValueError:
-        return "Ollama returned an invalid response. Please check the local Ollama server."
+        return _fallback_with_reason(
+            "Ollama returned an invalid response. Please check the local Ollama server.",
+            question,
+            config.language,
+        )
 
 
-def _generate_with_byok(prompt: str, config: AIProviderConfig) -> str:
+def _generate_with_byok(prompt: str, question: str, config: AIProviderConfig) -> str:
     """Call an OpenAI-compatible chat completions endpoint with a user-provided token."""
     if not config.api_token:
-        return "Please enter your BYOK API key/token in the sidebar before generating an AI response."
+        return _fallback_with_reason(
+            "Please enter your BYOK API key/token in the sidebar before generating an AI response.",
+            question,
+            config.language,
+        )
 
     try:
         response = requests.post(
@@ -125,15 +147,29 @@ def _generate_with_byok(prompt: str, config: AIProviderConfig) -> str:
         data = response.json()
         choices = data.get("choices", [])
         if choices:
-            return choices[0].get("message", {}).get("content", "").strip()
-        return "The BYOK provider returned an empty response. Please check your model and endpoint."
+            ai_text = choices[0].get("message", {}).get("content", "").strip()
+            if ai_text:
+                return ai_text
+        return _fallback_with_reason(
+            "The BYOK provider returned an empty response. Please check your model and endpoint.",
+            question,
+            config.language,
+        )
     except requests.exceptions.ConnectionError:
-        return "I could not reach the BYOK provider endpoint. Please check the URL and your internet connection."
+        return _fallback_with_reason(
+            "I could not reach the BYOK provider endpoint. Please check the URL and your internet connection.",
+            question,
+            config.language,
+        )
     except requests.exceptions.Timeout:
-        return "The BYOK provider took too long to respond. Please try again."
+        return _fallback_with_reason("The BYOK provider took too long to respond. Please try again.", question, config.language)
     except requests.exceptions.HTTPError as exc:
-        return f"BYOK provider returned an HTTP error: {exc}"
+        return _fallback_with_reason(f"BYOK provider returned an HTTP error: {exc}", question, config.language)
     except requests.exceptions.RequestException as exc:
-        return f"BYOK provider returned an error: {exc}"
+        return _fallback_with_reason(f"BYOK provider returned an error: {exc}", question, config.language)
     except ValueError:
-        return "The BYOK provider returned an invalid response. Please check the endpoint format."
+        return _fallback_with_reason(
+            "The BYOK provider returned an invalid response. Please check the endpoint format.",
+            question,
+            config.language,
+        )
