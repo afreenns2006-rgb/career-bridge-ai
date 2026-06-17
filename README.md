@@ -340,6 +340,7 @@ python -m py_compile *.py
 
 ---
 
+<<<<<<< HEAD
 ## 👥 Team Members
 
 | Name | Role |
@@ -375,3 +376,7 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 Career Bridge AI was built as a student-focused hackathon project to make career guidance more accessible, practical, and personalized.
 
 **Status:** Hackathon Submission Ready ✅
+=======
+
+
+>>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9

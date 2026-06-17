@@ -20,6 +20,214 @@ LEARNING_RESOURCES = {
     "sql": ["LeetCode SQL", "HackerRank SQL", "W3Schools SQL", "Mode Analytics SQL Tutorial"],
     "javascript": ["JavaScript.info", "Codecademy JS", "Udemy JS Course", "Mozilla JS Guide"],
     "data analysis": ["Pandas Documentation", "DataCamp Courses", "Medium Articles", "Kaggle Datasets"],
+    "excel": ["Excel Advanced Tutorials", "DataCamp Excel", "Linkedin Learning Excel", "YouTube Excel Masters"],
+    "statistics": ["Statistics with Python", "Khan Academy Stats", "Udacity Stats", "StatQuest Videos"],
+    "power bi": ["Power BI Tutorials", "Microsoft Power BI Docs", "Udemy Power BI", "YouTube Power BI"],
+    "tableau": ["Tableau Public Gallery", "Tableau Training Videos", "Udemy Tableau", "DataCamp Tableau"],
+    "data cleaning": ["Data Cleaning with Python", "Pandas Tutorials", "OpenRefine Guides", "Kaggle Notebooks"],
+    "visualization": ["Matplotlib & Seaborn", "D3.js Guide", "Plotly Documentation", "Tableau Examples"],
+}
+
+# Comprehensive career roadmaps with full details
+CAREER_ROADMAPS = {
+    "data analyst": {
+        "months": [
+            {
+                "month": 1,
+                "title": "Foundations & Excel Mastery",
+                "skills_to_develop": ["Excel", "Data Fundamentals"],
+                "topics_to_learn": [
+                    "Excel VLOOKUP, INDEX-MATCH, Pivot Tables",
+                    "Data concepts: types, sources, validation",
+                    "Basic statistics fundamentals"
+                ],
+                "projects_to_build": ["Excel Dashboard with sample data", "Pivot table analysis"],
+                "estimated_hours": 40,
+                "resources": ["Excel Advanced Tutorials", "DataCamp Excel", "YouTube Excel Masters"]
+            },
+            {
+                "month": 2,
+                "title": "SQL & Databases",
+                "skills_to_develop": ["SQL", "Database Basics"],
+                "topics_to_learn": [
+                    "SELECT, WHERE, JOIN, GROUP BY, HAVING",
+                    "Aggregate functions and subqueries",
+                    "Database design basics"
+                ],
+                "projects_to_build": ["SQL queries on sample database", "Multi-table analysis"],
+                "estimated_hours": 40,
+                "resources": ["LeetCode SQL", "HackerRank SQL", "Mode Analytics SQL Tutorial", "W3Schools SQL"]
+            },
+            {
+                "month": 3,
+                "title": "Python for Data Analysis",
+                "skills_to_develop": ["Python", "Data Cleaning"],
+                "topics_to_learn": [
+                    "Python basics: variables, loops, functions",
+                    "NumPy arrays and operations",
+                    "Pandas DataFrames and data manipulation"
+                ],
+                "projects_to_build": ["Data cleaning with Python", "CSV data transformation"],
+                "estimated_hours": 45,
+                "resources": ["Real Python Tutorials", "DataCamp Python Track", "Codecademy Python"]
+            },
+            {
+                "month": 4,
+                "title": "Statistics & EDA",
+                "skills_to_develop": ["Statistics", "Exploratory Data Analysis"],
+                "topics_to_learn": [
+                    "Descriptive statistics and distributions",
+                    "Hypothesis testing and p-values",
+                    "Exploratory Data Analysis techniques"
+                ],
+                "projects_to_build": ["Statistical analysis report", "EDA on Kaggle dataset"],
+                "estimated_hours": 40,
+                "resources": ["Khan Academy Stats", "StatQuest Videos", "Udacity Statistics"]
+            },
+            {
+                "month": 5,
+                "title": "Data Visualization",
+                "skills_to_develop": ["Power BI", "Tableau", "Visualization"],
+                "topics_to_learn": [
+                    "Matplotlib & Seaborn in Python",
+                    "Power BI or Tableau basics",
+                    "Dashboard design principles"
+                ],
+                "projects_to_build": ["Interactive Power BI dashboard", "Tableau visualization"],
+                "estimated_hours": 45,
+                "resources": ["Power BI Tutorials", "Tableau Public Gallery", "Plotly Documentation"]
+            },
+            {
+                "month": 6,
+                "title": "Advanced Projects & Portfolio",
+                "skills_to_develop": ["Advanced Analysis", "Communication"],
+                "topics_to_learn": [
+                    "Time series analysis",
+                    "Predictive analytics basics",
+                    "Data storytelling and reporting"
+                ],
+                "projects_to_build": ["End-to-end analysis project", "GitHub portfolio"],
+                "estimated_hours": 50,
+                "resources": ["Kaggle Competitions", "Real-world datasets", "GitHub Resume"]
+            }
+        ]
+    },
+    "data scientist": {
+        "months": [
+            {
+                "month": 1,
+                "title": "Python & Math Foundations",
+                "skills_to_develop": ["Python", "Mathematics"],
+                "topics_to_learn": ["Python basics", "Linear algebra", "Calculus basics"],
+                "projects_to_build": ["Python fundamentals project"],
+                "estimated_hours": 40,
+                "resources": ["Real Python", "Codecademy Python", "DataCamp Python"]
+            },
+            {
+                "month": 2,
+                "title": "Statistics & Probability",
+                "skills_to_develop": ["Statistics", "Probability"],
+                "topics_to_learn": ["Probability distributions", "Hypothesis testing", "A/B testing"],
+                "projects_to_build": ["Statistical analysis"],
+                "estimated_hours": 40,
+                "resources": ["Khan Academy", "StatQuest", "Coursera Statistics"]
+            },
+            {
+                "month": 3,
+                "title": "Data Manipulation & SQL",
+                "skills_to_develop": ["SQL", "Pandas"],
+                "topics_to_learn": ["SQL queries", "DataFrame operations", "Data cleaning"],
+                "projects_to_build": ["Database analysis project"],
+                "estimated_hours": 45,
+                "resources": ["LeetCode SQL", "DataCamp SQL", "Mode Analytics"]
+            },
+            {
+                "month": 4,
+                "title": "Machine Learning Basics",
+                "skills_to_develop": ["Machine Learning", "Scikit-learn"],
+                "topics_to_learn": ["Supervised learning", "Regression", "Classification"],
+                "projects_to_build": ["ML model project"],
+                "estimated_hours": 50,
+                "resources": ["Andrew Ng ML Course", "Fast.ai", "Kaggle"]
+            },
+            {
+                "month": 5,
+                "title": "Deep Learning & Neural Networks",
+                "skills_to_develop": ["Deep Learning", "TensorFlow"],
+                "topics_to_learn": ["Neural networks", "CNNs", "RNNs"],
+                "projects_to_build": ["Deep learning project"],
+                "estimated_hours": 50,
+                "resources": ["TensorFlow Tutorials", "Fast.ai DL", "Coursera DL"]
+            },
+            {
+                "month": 6,
+                "title": "Advanced Projects & Deployment",
+                "skills_to_develop": ["Model Deployment", "Communication"],
+                "topics_to_learn": ["Model evaluation", "Deployment", "Communication"],
+                "projects_to_build": ["Deployed ML model", "Portfolio"],
+                "estimated_hours": 50,
+                "resources": ["MLOps guides", "GitHub", "Medium Articles"]
+            }
+        ]
+    },
+    "software developer": {
+        "months": [
+            {
+                "month": 1,
+                "title": "Programming Fundamentals",
+                "skills_to_develop": ["Python", "Logic"],
+                "topics_to_learn": ["Variables", "Loops", "Functions", "OOP"],
+                "projects_to_build": ["Calculator app"],
+                "estimated_hours": 40,
+                "resources": ["Codecademy", "Real Python", "Udemy"]
+            },
+            {
+                "month": 2,
+                "title": "Web Development Basics",
+                "skills_to_develop": ["HTML", "CSS", "JavaScript"],
+                "topics_to_learn": ["HTML structure", "CSS styling", "JavaScript DOM"],
+                "projects_to_build": ["Personal website"],
+                "estimated_hours": 40,
+                "resources": ["MDN Web Docs", "Codecademy", "FreeCodeCamp"]
+            },
+            {
+                "month": 3,
+                "title": "Frontend Frameworks",
+                "skills_to_develop": ["React", "JavaScript"],
+                "topics_to_learn": ["React components", "State management", "Hooks"],
+                "projects_to_build": ["React Todo app"],
+                "estimated_hours": 45,
+                "resources": ["React Docs", "Scrimba", "Udemy React"]
+            },
+            {
+                "month": 4,
+                "title": "Backend Development",
+                "skills_to_develop": ["Node.js", "Express", "Databases"],
+                "topics_to_learn": ["Server setup", "REST APIs", "Database design"],
+                "projects_to_build": ["REST API project"],
+                "estimated_hours": 45,
+                "resources": ["Node.js Docs", "Express Tutorials", "Udemy Node"]
+            },
+            {
+                "month": 5,
+                "title": "Databases & SQL",
+                "skills_to_develop": ["SQL", "MongoDB"],
+                "topics_to_learn": ["SQL queries", "NoSQL", "Database optimization"],
+                "projects_to_build": ["Database design project"],
+                "estimated_hours": 40,
+                "resources": ["LeetCode SQL", "MongoDB Docs", "Coursera"]
+            },
+            {
+                "month": 6,
+                "title": "Full Stack Integration & Deployment",
+                "skills_to_develop": ["DevOps", "Git", "Deployment"],
+                "topics_to_learn": ["Version control", "Deployment", "CI/CD"],
+                "projects_to_build": ["Full stack app", "GitHub portfolio"],
+                "estimated_hours": 45,
+                "resources": ["GitHub", "Heroku Docs", "AWS Tutorials"]
+            }
+        ]
+    }
 }
 
 
@@ -64,6 +272,7 @@ class RoadmapGenerator:
             - Recommended resources
             - Timeline and milestones
             - Expected outcomes
+<<<<<<< HEAD
 
         TODO: Implement learning plan generation algorithm using:
             - Skill gap analysis
@@ -71,13 +280,78 @@ class RoadmapGenerator:
             - Learning curve estimation
             - Time management
             - Goal setting
+=======
+>>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
         """
-        # Define target skills for different careers
+        # Try to use predefined comprehensive roadmap first
+        career_lower = target_career.lower()
+        
+        # Check if we have a comprehensive roadmap for this career
+        for key, roadmap in CAREER_ROADMAPS.items():
+            if key in career_lower:
+                # Use predefined roadmap structure
+                monthly_goals = []
+                
+                # Adapt roadmap to requested duration
+                roadmap_months = roadmap.get("months", [])
+                
+                # If user wants fewer months, compress the roadmap
+                if duration_months < len(roadmap_months):
+                    step = max(1, len(roadmap_months) // duration_months)
+                    selected_months = roadmap_months[::step][:duration_months]
+                # If user wants more months, expand by repeating
+                elif duration_months > len(roadmap_months):
+                    selected_months = roadmap_months
+                    # Fill remaining months with advanced topics
+                    for i in range(duration_months - len(roadmap_months)):
+                        selected_months.append({
+                            "month": len(selected_months) + 1,
+                            "title": f"Advanced Topics & Projects {i+1}",
+                            "skills_to_develop": ["Advanced Practice", "Project Building"],
+                            "topics_to_learn": ["Complex projects", "Best practices", "Code optimization"],
+                            "projects_to_build": [f"Portfolio project {i+1}"],
+                            "estimated_hours": 50,
+                            "resources": ["GitHub", "Stack Overflow", "Portfolio websites"]
+                        })
+                else:
+                    selected_months = roadmap_months
+                
+                # Renumber months to match requested duration
+                for idx, month_data in enumerate(selected_months, 1):
+                    month_copy = month_data.copy()
+                    month_copy["month"] = idx
+                    # Adjust hours based on available time per week
+                    month_copy["estimated_hours"] = int(available_hours_per_week * 4.33)  # ~4.33 weeks per month
+                    monthly_goals.append(month_copy)
+                
+                # Extract skills from roadmap
+                all_skills = []
+                for month_data in monthly_goals:
+                    all_skills.extend(month_data.get("skills_to_develop", []))
+                
+                current_skills_lower = [s.lower() for s in current_skills]
+                missing_skills = [s for s in all_skills if s.lower() not in current_skills_lower]
+                
+                return {
+                    "target_career": target_career,
+                    "current_skills": current_skills,
+                    "missing_skills": missing_skills[:10],  # Top 10 missing
+                    "target_skills": all_skills,
+                    "duration_months": duration_months,
+                    "available_hours_per_week": available_hours_per_week,
+                    "monthly_goals": monthly_goals,
+                    "total_learning_hours": int(available_hours_per_week * 4.33 * duration_months),
+                    "created_at": datetime.now().isoformat(),
+                    "source": "predefined_roadmap"
+                }
+        
+        # Fallback: Generate basic roadmap if no predefined one matches
         career_skills = {
             "Data Scientist": ["python", "machine learning", "sql", "data analysis", "statistics"],
             "Software Developer": ["python", "javascript", "sql", "git", "web development"],
             "DevOps Engineer": ["docker", "kubernetes", "aws", "linux", "ci/cd"],
             "Full Stack Developer": ["javascript", "python", "sql", "react", "node.js"],
+            "Data Analyst": ["excel", "sql", "python", "statistics", "power bi", "tableau", "data analysis"],
         }
 
         target_skills = career_skills.get(target_career, ["python", "sql"])
@@ -85,6 +359,7 @@ class RoadmapGenerator:
 
         # Calculate missing skills
         missing_skills = [s for s in target_skills if s.lower() not in current_skills_lower]
+<<<<<<< HEAD
 
         # Generate monthly breakdown
         monthly_goals = []
@@ -104,6 +379,52 @@ class RoadmapGenerator:
                 }
             )
 
+=======
+        
+        # Generate monthly breakdown with complete structure
+        monthly_goals = []
+        
+        # Ensure we have enough content for each month
+        base_skills = missing_skills if missing_skills else target_skills
+        skills_per_month = max(1, len(base_skills) // max(duration_months, 1))
+        
+        for month in range(1, duration_months + 1):
+            month_start = (month - 1) * skills_per_month
+            month_end = min(month * skills_per_month, len(base_skills))
+            month_skills = base_skills[month_start:month_end] if month_start < len(base_skills) else []
+            
+            # Ensure every month has at least one skill
+            if not month_skills and base_skills:
+                month_skills = [base_skills[min(month - 1, len(base_skills) - 1)]]
+            
+            # Generate topics for each skill
+            topics = []
+            for skill in month_skills:
+                if skill.lower() == "python":
+                    topics.extend(["Variables and data types", "Functions and modules", "OOP concepts"])
+                elif skill.lower() == "sql":
+                    topics.extend(["SELECT queries", "JOINs and subqueries", "Aggregation functions"])
+                elif skill.lower() == "machine learning":
+                    topics.extend(["Supervised learning", "Model evaluation", "Feature engineering"])
+                else:
+                    topics.append(f"Master {skill} fundamentals")
+            
+            # Generate projects for this month
+            projects = []
+            for skill in month_skills:
+                projects.append(f"Build a {skill} project")
+            
+            monthly_goals.append({
+                "month": month,
+                "title": f"Month {month}: {', '.join(month_skills[:2])}{'...' if len(month_skills) > 2 else ''}",
+                "skills_to_develop": month_skills if month_skills else ["Review and Practice"],
+                "topics_to_learn": topics if topics else ["Foundational concepts"],
+                "projects_to_build": projects if projects else ["Practice exercises"],
+                "estimated_hours": int(available_hours_per_week * 4.33),
+                "resources": self._get_month_resources(month_skills)
+            })
+        
+>>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
         return {
             "target_career": target_career,
             "current_skills": current_skills,
@@ -112,11 +433,33 @@ class RoadmapGenerator:
             "duration_months": duration_months,
             "available_hours_per_week": available_hours_per_week,
             "monthly_goals": monthly_goals,
+<<<<<<< HEAD
             "total_learning_hours": available_hours_per_week * 4 * duration_months,
             "created_at": datetime.now().isoformat(),
         }
 
     def generate_monthly_goals(self, learning_plan: dict[str, Any], month_number: int) -> list[dict[str, Any]]:
+=======
+            "total_learning_hours": int(available_hours_per_week * 4.33 * duration_months),
+            "created_at": datetime.now().isoformat(),
+            "source": "generated_roadmap"
+        }
+    
+    def _get_month_resources(self, skills: List[str]) -> List[str]:
+        """Helper to get resources for skills in a month."""
+        resources = []
+        for skill in skills[:3]:
+            skill_lower = skill.lower()
+            if skill_lower in LEARNING_RESOURCES:
+                resources.extend(LEARNING_RESOURCES[skill_lower][:2])
+        return resources if resources else ["Online tutorials", "Documentation", "Community forums"]
+    
+    def generate_monthly_goals(
+        self,
+        learning_plan: Dict[str, Any],
+        month_number: int
+    ) -> List[Dict[str, Any]]:
+>>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
         """
         Generate monthly goals for a specific month.
 

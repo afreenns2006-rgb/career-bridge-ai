@@ -1,0 +1,8 @@
+title = "Project Gitleaks Config"
+
+[allowlist]
+description = "Allow common test values"
+paths = [
+  ".git",
+  ".venv"
+]

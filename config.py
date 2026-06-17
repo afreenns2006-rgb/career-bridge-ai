@@ -51,6 +51,35 @@ MAX_ATS_SCORE: Final[float] = 100.0
 DEFAULT_BATCH_SIZE: Final[int] = 32
 RANDOM_STATE: Final[int] = 42
 
+# ============================================
+# AI Configuration (NEW)
+# ============================================
+
+# AI Provider: "ollama" or "byok"
+AI_PROVIDER: Final[str] = os.getenv("AI_PROVIDER", "ollama")
+
+# Ollama configuration
+OLLAMA_API_URL: Final[str] = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")
+OLLAMA_MODEL: Final[str] = os.getenv("OLLAMA_MODEL", "llama3.2")
+OLLAMA_HEALTH_URL: Final[str] = os.getenv("OLLAMA_HEALTH_URL", "http://localhost:11434")
+
+# BYOK Configuration
+BYOK_API_KEY: Final[str] = os.getenv("BYOK_API_KEY", "")
+BYOK_PROVIDER_TYPE: Final[str] = os.getenv("BYOK_PROVIDER_TYPE", "generic")
+
+# ============================================
+# Language Configuration (NEW)
+# ============================================
+
+# Default language
+DEFAULT_LANGUAGE: Final[str] = os.getenv("DEFAULT_LANGUAGE", "English")
+
+# Enable multilingual support
+ENABLE_MULTILINGUAL: Final[bool] = os.getenv("ENABLE_MULTILINGUAL", "True").lower() == "true"
+
+# Supported languages
+SUPPORTED_LANGUAGES: Final[list[str]] = ["English", "हिंदी", "తెలుగు"]
+
 
 def ensure_directories() -> None:
     """

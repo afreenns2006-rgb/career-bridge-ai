@@ -1,0 +1,13 @@
+[changelog]
+header = """
+# Changelog
+"""
+
+body = """
+{% for commit in commits %}
+- {{ commit.message }}
+{% endfor %}
+"""
+
+[git]
+conventional_commits = false
