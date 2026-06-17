@@ -1,4 +1,4 @@
-"""
+﻿"""
 Career recommendation engine for Career Bridge AI.
 
 Provides career recommendations based on user skills, experience,
@@ -200,7 +200,6 @@ class CareerRecommendationEngine:
             return self.generate_fallback_recommendations(user_skills, education, experience_years, preferences)
 
         for _, career_row in self.careers_df.iterrows():
-<<<<<<< HEAD
             career_name = str(career_row.get(career_column, "")).strip()
             if not career_name or career_name.lower() == "unknown":
                 continue
@@ -208,13 +207,6 @@ class CareerRecommendationEngine:
             required_skills = [s.strip() for s in required_skills_str.split(",") if s.strip()]
             min_experience = self._safe_int(career_row.get(min_experience_column, 0) if min_experience_column else 0)
 
-=======
-            career_name = career_row.get("career", "Unnamed Career")
-            required_skills_str = career_row.get("required_skills", "")
-            required_skills = [s.strip() for s in required_skills_str.split(",")]
-            min_experience = int(career_row.get("min_experience", 0))
-            
->>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
             # Calculate skill match score
             matching_skills = len([s for s in required_skills if s.lower() in user_skills_lower])
             skill_match = (matching_skills / len(required_skills) * 100) if required_skills else 0
@@ -228,7 +220,6 @@ class CareerRecommendationEngine:
             overall_score = skill_match * 0.6 + experience_score * 0.4
 
             if overall_score > 30:  # Only show careers with at least 30% match
-<<<<<<< HEAD
                 recommendations.append(
                     {
                         "career_name": career_name,
@@ -297,22 +288,6 @@ class CareerRecommendationEngine:
         return next_steps
 
     def generate_fallback_recommendations(
-=======
-                recommendations.append({
-                    "career_name": career_name,
-                    "match_score": round(overall_score, 1),
-                    "skill_match": round(skill_match, 1),
-                    "required_skills": required_skills,
-                    "matching_skills": [s for s in required_skills if s.lower() in user_skills_lower],
-                    "missing_skills": [s for s in required_skills if s.lower() not in user_skills_lower],
-                    "salary_range": career_row.get("salary_range", "Not specified"),
-                    "growth_potential": career_row.get("growth", "Not specified")
-                })
-        
-        return self.rank_recommendations(recommendations)
-    
-    def calculate_skill_gap(
->>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
         self,
         user_skills: list[str],
         education: str,
@@ -443,19 +418,11 @@ class CareerRecommendationEngine:
         required_skills = [s.strip() for s in str(row.get(skills_column, "")).split(",") if s.strip()]
 
         return {
-<<<<<<< HEAD
             "career_name": row.get(career_column, ""),
             "required_skills": required_skills,
             "min_experience": self._safe_int(row.get(min_experience_column, 0) if min_experience_column else 0),
             "salary_range": row.get(salary_column, "Not specified") if salary_column else "Not specified",
             "growth_potential": row.get(growth_column, "Promising") if growth_column else "Promising",
-=======
-            "career_name": row.get("career", "Unnamed Career"),
-            "required_skills": required_skills,
-            "min_experience": int(row.get("min_experience", 0)),
-            "salary_range": row.get("salary_range", "Not specified"),
-            "growth_potential": row.get("growth", "Not specified")
->>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
         }
 
     def get_similar_careers(self, career_name: str, count: int = 5) -> list[dict[str, Any]]:

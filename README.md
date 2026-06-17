@@ -1,4 +1,4 @@
-# 🎓 Career Bridge AI
+﻿# ðŸŽ“ Career Bridge AI
 
 > **AI-powered career guidance platform that helps students, fresh graduates, and job seekers move from confusion to a clear career plan.**
 
@@ -8,16 +8,16 @@
 [![Scikit-learn](https://img.shields.io/badge/Scikit--learn-ML-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-## 🚀 Live Demo
+## ðŸš€ Live Demo
 
 | Resource | Link |
 |---|---|
-| 🌐 Live App | [Open Career Bridge AI](https://careerbridgeai-3kkasz5pd3ad7fzfry39e3.streamlit.app) |
-| 💻 GitHub Repository | [github.com/afreenns2006-rgb/career-bridge-ai](https://github.com/afreenns2006-rgb/career-bridge-ai) |
+| ðŸŒ Live App | [Open Career Bridge AI](https://careerbridgeai-3kkasz5pd3ad7fzfry39e3.streamlit.app) |
+| ðŸ’» GitHub Repository | [github.com/afreenns2006-rgb/career-bridge-ai](https://github.com/afreenns2006-rgb/career-bridge-ai) |
 
 ---
 
-## 📌 Problem Statement
+## ðŸ“Œ Problem Statement
 
 Many students and fresh graduates struggle to make informed career decisions. They often do not know:
 
@@ -31,7 +31,7 @@ Career guidance is often scattered across different websites and platforms. This
 
 ---
 
-## 💡 Proposed Solution
+## ðŸ’¡ Proposed Solution
 
 **Career Bridge AI** brings career planning, resume feedback, opportunity discovery, learning guidance, and AI assistance into one beginner-friendly Streamlit app.
 
@@ -47,24 +47,24 @@ The platform helps users:
 
 ---
 
-## ✨ Key Features
+## âœ¨ Key Features
 
 | Feature | Description |
 |---|---|
-| 📄 Resume Analyzer | Upload a PDF, DOCX, or TXT resume and get extracted skills, education, experience, ATS score, and improvement suggestions. |
-| 💼 Career Mentor | Get career recommendations based on skills, education, and experience. |
-| 🎓 Scholarship Finder | Discover scholarships using education level, income, GPA, and eligibility details. |
-| 🏛️ Government Schemes | Find relevant government schemes with eligibility, benefits, required documents, and application steps. |
-| 🚀 Opportunities Finder | Search internships, competitions, bootcamps, and career-building opportunities. |
-| 🗺️ Learning Roadmap | Generate a structured learning plan with monthly goals, skills, and resources. |
-| 🤖 AI Career Assistant | Ask career questions and receive roadmaps, resume tips, interview questions, skill suggestions, and project ideas. |
-| 🌐 Multilingual Support | AI responses support English, Hindi, and Telugu. |
-| 🔐 BYOK Support | Users can bring their own API key/token through a secure password input. |
-| 🧠 Local AI with Ollama | Supports local inference through Ollama at `http://localhost:11434/api/generate`. |
+| ðŸ“„ Resume Analyzer | Upload a PDF, DOCX, or TXT resume and get extracted skills, education, experience, ATS score, and improvement suggestions. |
+| ðŸ’¼ Career Mentor | Get career recommendations based on skills, education, and experience. |
+| ðŸŽ“ Scholarship Finder | Discover scholarships using education level, income, GPA, and eligibility details. |
+| ðŸ›ï¸ Government Schemes | Find relevant government schemes with eligibility, benefits, required documents, and application steps. |
+| ðŸš€ Opportunities Finder | Search internships, competitions, bootcamps, and career-building opportunities. |
+| ðŸ—ºï¸ Learning Roadmap | Generate a structured learning plan with monthly goals, skills, and resources. |
+| ðŸ¤– AI Career Assistant | Ask career questions and receive roadmaps, resume tips, interview questions, skill suggestions, and project ideas. |
+| ðŸŒ Multilingual Support | AI responses support English, Hindi, and Telugu. |
+| ðŸ” BYOK Support | Users can bring their own API key/token through a secure password input. |
+| ðŸ§  Local AI with Ollama | Supports local inference through Ollama at `http://localhost:11434/api/generate`. |
 
 ---
 
-## 🧠 AI Features
+## ðŸ§  AI Features
 
 The **AI Career Assistant** can generate:
 
@@ -94,7 +94,7 @@ The AI Career Assistant responds in the selected language without breaking exist
 
 ---
 
-## 🛠️ Tech Stack
+## ðŸ› ï¸ Tech Stack
 
 | Category | Tools |
 |---|---|
@@ -109,37 +109,37 @@ The AI Career Assistant responds in the selected language without breaking exist
 
 ---
 
-## 📁 Project Structure
+## ðŸ“ Project Structure
 
 ```text
 career-bridge-ai/
-├── app.py                         # Main Streamlit application
-├── config.py                      # Application settings and paths
-├── database.py                    # SQLite database helper
-├── resume_parser.py               # Resume parsing and ATS scoring
-├── career_engine.py               # Career recommendation engine
-├── scholarship_engine.py          # Scholarship matching engine
-├── scheme_engine.py               # Government scheme recommendation engine
-├── opportunity_engine.py          # Opportunity discovery engine
-├── roadmap_engine.py              # Learning roadmap generator
-├── services/
-│   ├── ai_provider.py             # Ollama, BYOK, and fallback AI provider logic
-│   └── language.py                # Language options and multilingual fallback content
-├── data/
-│   ├── careers.csv
-│   ├── scholarships.csv
-│   ├── schemes.csv
-│   └── opportunities.csv
-├── tests/                         # Pytest tests
-├── requirements.txt               # Python dependencies
-├── .env.example                   # Safe placeholder environment variables
-├── README.md
-└── LICENSE
+â”œâ”€â”€ app.py                         # Main Streamlit application
+â”œâ”€â”€ config.py                      # Application settings and paths
+â”œâ”€â”€ database.py                    # SQLite database helper
+â”œâ”€â”€ resume_parser.py               # Resume parsing and ATS scoring
+â”œâ”€â”€ career_engine.py               # Career recommendation engine
+â”œâ”€â”€ scholarship_engine.py          # Scholarship matching engine
+â”œâ”€â”€ scheme_engine.py               # Government scheme recommendation engine
+â”œâ”€â”€ opportunity_engine.py          # Opportunity discovery engine
+â”œâ”€â”€ roadmap_engine.py              # Learning roadmap generator
+â”œâ”€â”€ services/
+â”‚   â”œâ”€â”€ ai_provider.py             # Ollama, BYOK, and fallback AI provider logic
+â”‚   â””â”€â”€ language.py                # Language options and multilingual fallback content
+â”œâ”€â”€ data/
+â”‚   â”œâ”€â”€ careers.csv
+â”‚   â”œâ”€â”€ scholarships.csv
+â”‚   â”œâ”€â”€ schemes.csv
+â”‚   â””â”€â”€ opportunities.csv
+â”œâ”€â”€ tests/                         # Pytest tests
+â”œâ”€â”€ requirements.txt               # Python dependencies
+â”œâ”€â”€ .env.example                   # Safe placeholder environment variables
+â”œâ”€â”€ README.md
+â””â”€â”€ LICENSE
 ```
 
 ---
 
-## ⚙️ How to Run Locally
+## âš™ï¸ How to Run Locally
 
 ### 1. Clone the Repository
 
@@ -198,7 +198,7 @@ http://localhost:8501
 
 ---
 
-## 🧠 Local AI Setup with Ollama
+## ðŸ§  Local AI Setup with Ollama
 
 Career Bridge AI supports local AI inference using Ollama.
 
@@ -226,7 +226,7 @@ If Ollama is not running, the app shows a friendly error message instead of cras
 
 ---
 
-## 🔐 BYOK - Bring Your Own Key / Token
+## ðŸ” BYOK - Bring Your Own Key / Token
 
 Career Bridge AI supports BYOK for users who want to connect their own AI provider.
 
@@ -244,7 +244,7 @@ https://api.openai.com/v1/chat/completions
 
 ---
 
-## ☁️ Deployment Details
+## â˜ï¸ Deployment Details
 
 | Item | Details |
 |---|---|
@@ -264,7 +264,7 @@ For Streamlit Cloud deployment:
 
 ---
 
-## 🔍 How It Works
+## ðŸ” How It Works
 
 ### Career Recommendation Algorithm
 
@@ -300,7 +300,7 @@ The platform uses rule-based eligibility checks such as:
 
 ---
 
-## 🧪 Testing
+## ðŸ§ª Testing
 
 Run tests with:
 
@@ -316,7 +316,7 @@ python -m py_compile *.py
 
 ---
 
-## 🔒 Privacy and Security
+## ðŸ”’ Privacy and Security
 
 - Resume files are processed locally by the app.
 - Real API keys should never be committed.
@@ -326,7 +326,7 @@ python -m py_compile *.py
 
 ---
 
-## 🌱 Future Improvements
+## ðŸŒ± Future Improvements
 
 - More Indian regional languages.
 - Real-time job market integration.
@@ -340,8 +340,7 @@ python -m py_compile *.py
 
 ---
 
-<<<<<<< HEAD
-## 👥 Team Members
+## ðŸ‘¥ Team Members
 
 | Name | Role |
 |---|---|
@@ -353,7 +352,7 @@ python -m py_compile *.py
 
 ---
 
-## 🤝 Contributing
+## ðŸ¤ Contributing
 
 Contributions are welcome.
 
@@ -365,18 +364,14 @@ Contributions are welcome.
 
 ---
 
-## 📄 License
+## ðŸ“„ License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙌 Acknowledgement
+## ðŸ™Œ Acknowledgement
 
 Career Bridge AI was built as a student-focused hackathon project to make career guidance more accessible, practical, and personalized.
 
-**Status:** Hackathon Submission Ready ✅
-=======
-
-
->>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
+**Status:** Hackathon Submission Ready âœ…

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Learning roadmap generator for Career Bridge AI.
 
 Generates personalized learning plans and monthly goals based on
@@ -272,7 +272,6 @@ class RoadmapGenerator:
             - Recommended resources
             - Timeline and milestones
             - Expected outcomes
-<<<<<<< HEAD
 
         TODO: Implement learning plan generation algorithm using:
             - Skill gap analysis
@@ -280,8 +279,6 @@ class RoadmapGenerator:
             - Learning curve estimation
             - Time management
             - Goal setting
-=======
->>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
         """
         # Try to use predefined comprehensive roadmap first
         career_lower = target_career.lower()
@@ -359,7 +356,6 @@ class RoadmapGenerator:
 
         # Calculate missing skills
         missing_skills = [s for s in target_skills if s.lower() not in current_skills_lower]
-<<<<<<< HEAD
 
         # Generate monthly breakdown
         monthly_goals = []
@@ -379,52 +375,6 @@ class RoadmapGenerator:
                 }
             )
 
-=======
-        
-        # Generate monthly breakdown with complete structure
-        monthly_goals = []
-        
-        # Ensure we have enough content for each month
-        base_skills = missing_skills if missing_skills else target_skills
-        skills_per_month = max(1, len(base_skills) // max(duration_months, 1))
-        
-        for month in range(1, duration_months + 1):
-            month_start = (month - 1) * skills_per_month
-            month_end = min(month * skills_per_month, len(base_skills))
-            month_skills = base_skills[month_start:month_end] if month_start < len(base_skills) else []
-            
-            # Ensure every month has at least one skill
-            if not month_skills and base_skills:
-                month_skills = [base_skills[min(month - 1, len(base_skills) - 1)]]
-            
-            # Generate topics for each skill
-            topics = []
-            for skill in month_skills:
-                if skill.lower() == "python":
-                    topics.extend(["Variables and data types", "Functions and modules", "OOP concepts"])
-                elif skill.lower() == "sql":
-                    topics.extend(["SELECT queries", "JOINs and subqueries", "Aggregation functions"])
-                elif skill.lower() == "machine learning":
-                    topics.extend(["Supervised learning", "Model evaluation", "Feature engineering"])
-                else:
-                    topics.append(f"Master {skill} fundamentals")
-            
-            # Generate projects for this month
-            projects = []
-            for skill in month_skills:
-                projects.append(f"Build a {skill} project")
-            
-            monthly_goals.append({
-                "month": month,
-                "title": f"Month {month}: {', '.join(month_skills[:2])}{'...' if len(month_skills) > 2 else ''}",
-                "skills_to_develop": month_skills if month_skills else ["Review and Practice"],
-                "topics_to_learn": topics if topics else ["Foundational concepts"],
-                "projects_to_build": projects if projects else ["Practice exercises"],
-                "estimated_hours": int(available_hours_per_week * 4.33),
-                "resources": self._get_month_resources(month_skills)
-            })
-        
->>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
         return {
             "target_career": target_career,
             "current_skills": current_skills,
@@ -433,33 +383,11 @@ class RoadmapGenerator:
             "duration_months": duration_months,
             "available_hours_per_week": available_hours_per_week,
             "monthly_goals": monthly_goals,
-<<<<<<< HEAD
             "total_learning_hours": available_hours_per_week * 4 * duration_months,
             "created_at": datetime.now().isoformat(),
         }
 
     def generate_monthly_goals(self, learning_plan: dict[str, Any], month_number: int) -> list[dict[str, Any]]:
-=======
-            "total_learning_hours": int(available_hours_per_week * 4.33 * duration_months),
-            "created_at": datetime.now().isoformat(),
-            "source": "generated_roadmap"
-        }
-    
-    def _get_month_resources(self, skills: List[str]) -> List[str]:
-        """Helper to get resources for skills in a month."""
-        resources = []
-        for skill in skills[:3]:
-            skill_lower = skill.lower()
-            if skill_lower in LEARNING_RESOURCES:
-                resources.extend(LEARNING_RESOURCES[skill_lower][:2])
-        return resources if resources else ["Online tutorials", "Documentation", "Community forums"]
-    
-    def generate_monthly_goals(
-        self,
-        learning_plan: Dict[str, Any],
-        month_number: int
-    ) -> List[Dict[str, Any]]:
->>>>>>> 6637826e36fa71909091fdda4eef0a28cdd181f9
         """
         Generate monthly goals for a specific month.
 
