@@ -8,7 +8,7 @@ table creation, and CRUD operations.
 import sqlite3
 import os
 from pathlib import Path
-from typing import Any, Optional, List
+from typing import Any, Optional
 import logging
 
 from config import DB_PATH, DB_TIMEOUT

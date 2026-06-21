@@ -7,10 +7,9 @@ and ATS scoring.
 
 from io import BytesIO
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, Any
 import logging
 import re
-from collections import Counter
 
 try:
     from pypdf import PdfReader as PypdfReader

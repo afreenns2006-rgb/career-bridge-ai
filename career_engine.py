@@ -8,7 +8,6 @@ education, and preferences.
 from typing import Any, Optional
 import logging
 import pandas as pd
-from pathlib import Path
 
 from database import get_db_manager
 from config import CAREERS_CSV

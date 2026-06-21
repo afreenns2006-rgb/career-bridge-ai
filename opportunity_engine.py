@@ -5,10 +5,9 @@ Provides relevant opportunities (internships, jobs, competitions)
 based on user skills and preferences.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
 import logging
 import pandas as pd
-from datetime import datetime
 
 from database import get_db_manager
 from config import OPPORTUNITIES_CSV

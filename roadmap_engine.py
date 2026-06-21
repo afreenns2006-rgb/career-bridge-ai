@@ -5,7 +5,7 @@ Generates personalized learning plans and monthly goals based on
 user skills, target career, and available time.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
 import logging
 from datetime import datetime, timedelta
 

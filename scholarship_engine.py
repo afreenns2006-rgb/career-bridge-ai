@@ -5,7 +5,7 @@ Provides scholarship opportunities based on user eligibility criteria,
 academic profile, and preferences.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
 import logging
 import pandas as pd
 

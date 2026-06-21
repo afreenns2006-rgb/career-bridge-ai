@@ -5,7 +5,7 @@ Provides Indian government scheme recommendations based on eligibility
 criteria including state, education, income, and age.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
 import logging
 import pandas as pd
 

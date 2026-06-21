@@ -5,7 +5,6 @@ This script verifies that all components are properly implemented
 and the project is ready for deployment.
 """
 
-import os
 import sys
 from pathlib import Path
 
