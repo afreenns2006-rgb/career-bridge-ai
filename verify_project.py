@@ -5,6 +5,7 @@ This script verifies that all components are properly implemented
 and the project is ready for deployment.
 """
 
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -68,20 +69,16 @@ def verify_imports():
         print(f"  ❌ numpy - {e}")
         return False
 
-    try:
-        from PyPDF2 import PdfReader
-
+    if importlib.util.find_spec("PyPDF2") is not None:
         print("  ✅ PyPDF2")
-    except ImportError as e:
-        print(f"  ❌ PyPDF2 - {e}")
+    else:
+        print("  ❌ PyPDF2 - module not found")
         return False
 
-    try:
-        from docx import Document
-
+    if importlib.util.find_spec("docx") is not None:
         print("  ✅ python-docx")
-    except ImportError as e:
-        print(f"  ❌ python-docx - {e}")
+    else:
+        print("  ❌ python-docx - module not found")
         return False
 
     return True
