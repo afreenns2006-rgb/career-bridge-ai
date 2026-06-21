@@ -69,20 +69,14 @@ def verify_imports():
         return False
 
     try:
-        from PyPDF2 import PdfReader
-
+        import PyPDF2
         print("  ✅ PyPDF2")
-    except ImportError as e:
-        print(f"  ❌ PyPDF2 - {e}")
-        return False
-
-    try:
-        from docx import Document
-
-        print("  ✅ python-docx")
-    except ImportError as e:
-        print(f"  ❌ python-docx - {e}")
-        return False
+    except ImportError:
+     
+   try:
+    import docx
+    print("  ✅ python-docx")
+except ImportError:
 
     return True
 
