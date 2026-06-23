@@ -69,16 +69,20 @@ def verify_imports():
         print(f"  ❌ numpy - {e}")
         return False
 
-    if importlib.util.find_spec("PyPDF2") is not None:
+    try:
+        from PyPDF2 import PdfReader
+
         print("  ✅ PyPDF2")
-    else:
-        print("  ❌ PyPDF2 - module not found")
+    except ImportError as e:
+        print(f"  ❌ PyPDF2 - {e}")
         return False
 
-    if importlib.util.find_spec("docx") is not None:
+    try:
+        from docx import Document
+
         print("  ✅ python-docx")
-    else:
-        print("  ❌ python-docx - module not found")
+    except ImportError as e:
+        print(f"  ❌ python-docx - {e}")
         return False
 
     return True
